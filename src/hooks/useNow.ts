@@ -5,9 +5,13 @@ export function useNow(active = true, intervalMs = 1000): Date {
   const [now, setNow] = useState(() => new Date())
   useEffect(() => {
     if (!active) return
-    setNow(new Date())
-    const id = setInterval(() => setNow(new Date()), intervalMs)
-    return () => clearInterval(id)
+    const tick = () => setNow(new Date())
+    const first = setTimeout(tick, 0)
+    const id = setInterval(tick, intervalMs)
+    return () => {
+      clearTimeout(first)
+      clearInterval(id)
+    }
   }, [active, intervalMs])
   return now
 }

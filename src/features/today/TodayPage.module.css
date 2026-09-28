@@ -1,0 +1,31 @@
+.page {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.hero {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  padding: var(--space-2) 0 var(--space-4);
+}
+
+.totals {
+  display: inline-flex;
+  gap: var(--space-3);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.totals span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.hint {
+  margin: 0 0 var(--space-3);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}

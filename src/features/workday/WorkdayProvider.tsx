@@ -44,7 +44,6 @@ export function WorkdayProvider({ children }: { children: ReactNode }) {
       today ??= newDay(dateKeyNow, settings, previous)
       if (!cancelled) commit({ settings, today, previous })
     }
-    setError(null)
     load().catch((e: unknown) => !cancelled && setError(e instanceof Error ? e.message : String(e)))
     return () => {
       cancelled = true
@@ -129,18 +128,24 @@ export function WorkdayProvider({ children }: { children: ReactNode }) {
       <div role="alert" style={{ textAlign: 'center', paddingTop: '3rem' }}>
         <Shape kind="triangle" size={40} color="var(--rose)" />
         <p>Couldn't load your data: {error}</p>
-        <ShapeButton shape="circle" onClick={() => setAttempt((n) => n + 1)}>
+        <ShapeButton
+          shape="circle"
+          onClick={() => {
+            setError(null)
+            setAttempt((n) => n + 1)
+          }}
+        >
           Try again
         </ShapeButton>
       </div>
     )
   }
-  if (!value) {
+  if (!loaded) {
     return (
       <div aria-busy="true" style={{ display: 'grid', placeItems: 'center', paddingTop: '4rem' }}>
         <Shape kind="hexagon" size={36} />
       </div>
     )
   }
-  return <WorkdayContext.Provider value={value}>{children}</WorkdayContext.Provider>
+  return <WorkdayContext.Provider value={value!}>{children}</WorkdayContext.Provider>
 }
