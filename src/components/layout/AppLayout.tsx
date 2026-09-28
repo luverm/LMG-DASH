@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Link, Outlet, useLocation } from 'react-router'
+import { Link, NavLink, Outlet, useLocation } from 'react-router'
 import { daysUntil } from '@/app/data/connection'
 import { useData } from '@/app/data/DataContext'
 import { ToastProvider } from '@/components/feedback/ToastProvider'
+import { GearIcon } from '@/components/shapes/GearIcon'
 import { ShapeBackdrop } from '@/components/shapes/ShapeBackdrop'
 import { Shape } from '@/components/shapes/Shape'
 import { ShapeButton } from '@/components/ui/ShapeButton'
@@ -39,14 +40,16 @@ export function AppLayout() {
                 >
                   Wish
                 </ShapeButton>
-                <Link
+                <NavLink
                   to="/settings"
-                  className={styles.settings}
+                  className={({ isActive }) =>
+                    isActive ? `${styles.settings} ${styles.settingsActive}` : styles.settings
+                  }
                   aria-label="Settings"
                   title="Settings"
                 >
-                  <Shape kind="square" size={16} color="var(--text-muted)" />
-                </Link>
+                  <GearIcon size={20} />
+                </NavLink>
               </>
             }
           />
