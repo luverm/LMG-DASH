@@ -3,13 +3,21 @@ import { useData } from '@/app/data/DataContext'
 import { Card } from '@/components/ui/Card'
 import { Shape } from '@/components/shapes/Shape'
 import { ShapeButton } from '@/components/ui/ShapeButton'
+import { useToast } from '@/components/feedback/ToastContext'
+import { ShortcutList } from '@/components/layout/ShortcutList'
+import { routineItems } from '@/features/workday/day'
+import type { FocusPreset } from '@/features/workday/types'
 import { useWorkday } from '@/features/workday/WorkdayContext'
+import { notificationsSupported, requestNotifications } from '@/lib/notify'
+import { ExportSection } from './ExportSection'
+import { RoutinesEditor } from './RoutinesEditor'
 import styles from './Settings.module.css'
 
 export function SettingsPage() {
   const { mode, repoLabel, login, tokenExpiresAt, lock, disconnect, engine } = useData()
   const { settings, updateSettings, today, update } = useWorkday()
   const expiresIn = daysUntil(tokenExpiresAt)
+  const toast = useToast()
 
   return (
     <div className={styles.page}>
@@ -52,6 +60,89 @@ export function SettingsPage() {
             />
           </label>
         </div>
+      </Card>
+
+      <Card title="Focus & breaks">
+        <div className={styles.grid}>
+          <label className="field">
+            <span>Focus timer</span>
+            <select
+              className="input"
+              value={settings.focusPreset}
+              onChange={(e) => updateSettings({ focusPreset: e.target.value as FocusPreset })}
+            >
+              <option value="25/5">25 min focus, 5 min break</option>
+              <option value="50/10">50 min focus, 10 min break</option>
+            </select>
+          </label>
+          <label className="field">
+            <span>Ask about time away (desktop)</span>
+            <select
+              className="input"
+              value={settings.awayMinutes}
+              onChange={(e) => updateSettings({ awayMinutes: Number(e.target.value) })}
+            >
+              <option value={0}>Off</option>
+              <option value={15}>After 15 minutes</option>
+              <option value={30}>After 30 minutes</option>
+              <option value={60}>After 1 hour</option>
+            </select>
+          </label>
+        </div>
+        <div className={styles.notify}>
+          <div>
+            <strong>Notifications</strong>
+            <p className={styles.muted}>
+              {notificationsSupported()
+                ? 'A system notification for break reminders and the focus timer while the app is in the background.'
+                : "This browser doesn't support notifications here. On iPhone, add the app to your home screen first."}
+            </p>
+          </div>
+          {notificationsSupported() && (
+            <ShapeButton
+              shape="triangle"
+              variant={settings.notifications ? 'soft' : 'ghost'}
+              onClick={async () => {
+                if (settings.notifications) return updateSettings({ notifications: false })
+                const ok = await requestNotifications()
+                updateSettings({ notifications: ok })
+                if (!ok) toast('Notifications are blocked in your browser settings.')
+              }}
+            >
+              {settings.notifications ? 'On' : 'Turn on'}
+            </ShapeButton>
+          )}
+        </div>
+      </Card>
+
+      <Card title="Routines">
+        <RoutinesEditor
+          routines={settings.routines}
+          onChange={(routines, added) => {
+            updateSettings({ routines })
+            // A new routine that's due today goes straight into today's plan.
+            if (added && today.status === 'active') {
+              const [item] = routineItems(today.date, { ...settings, routines: [added] })
+              if (item) update((d) => ({ ...d, plan: [...d.plan, item] }))
+            }
+          }}
+        />
+      </Card>
+
+      <Card title="Export & backup">
+        <ExportSection />
+      </Card>
+
+      <Card title="Install the app">
+        <p className={styles.muted}>
+          Put LMG Dash on your home screen so it opens full-screen like an app. On iPhone: tap Share
+          in Safari, then <strong>Add to Home Screen</strong>. On a computer (Chrome or Edge): use
+          the install icon in the address bar.
+        </p>
+      </Card>
+
+      <Card title="Keyboard shortcuts" className={styles.desktopOnly}>
+        <ShortcutList />
       </Card>
 
       <Card title="Data">

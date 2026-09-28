@@ -12,10 +12,21 @@ interface DialogProps {
   children: ReactNode
   footer?: ReactNode
   wide?: boolean
+  /** Max width in px, for dialogs that need more room than `wide`. */
+  maxWidth?: number
 }
 
 /** Modal dialog. Escape and clicking the backdrop close it when onClose is given. */
-export function Dialog({ title, shape, color, onClose, children, footer, wide }: DialogProps) {
+export function Dialog({
+  title,
+  shape,
+  color,
+  onClose,
+  children,
+  footer,
+  wide,
+  maxWidth,
+}: DialogProps) {
   const titleId = useId()
   const panel = useRef<HTMLDivElement>(null)
 
@@ -41,6 +52,7 @@ export function Dialog({ title, shape, color, onClose, children, footer, wide }:
       <div
         ref={panel}
         className={`${styles.panel} ${wide ? styles.wide : ''}`}
+        style={maxWidth ? { maxWidth } : undefined}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

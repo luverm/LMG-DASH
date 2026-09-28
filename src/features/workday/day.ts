@@ -1,6 +1,7 @@
-import { createId } from '@/lib/time'
+import { createId, parseDateKey } from '@/lib/time'
 import type {
   BreakType,
+  FocusSession,
   DayRecord,
   DayState,
   DaySummary,
@@ -13,11 +14,29 @@ import type {
 
 /* ---------- Creation ---------- */
 
-/** A fresh day. Open plan items from the previous day carry over. */
+/** Plan items a routine adds on this date's weekday. */
+export function routineItems(date: string, settings: Settings): PlanItem[] {
+  const weekday = parseDateKey(date).getDay()
+  return settings.routines
+    .filter((r) => r.weekdays.includes(weekday))
+    .map((r) => ({
+      id: createId(),
+      title: r.title,
+      estimateMinutes: r.estimateMinutes,
+      projectId: r.projectId,
+      status: 'open' as const,
+      routineId: r.id,
+    }))
+}
+
+/**
+ * A fresh day: today's routines first, then open items carried over from the previous day.
+ * Unfinished routine items aren't carried; the routine adds them again when it's due.
+ */
 export function newDay(date: string, settings: Settings, previous?: DayRecord | null): DayRecord {
   const carried: PlanItem[] =
     previous?.plan
-      .filter((i) => i.status === 'open')
+      .filter((i) => i.status === 'open' && !i.routineId)
       .map((i) => ({
         id: createId(),
         title: i.title,
@@ -31,7 +50,7 @@ export function newDay(date: string, settings: Settings, previous?: DayRecord | 
     date,
     targetMinutes: settings.targetMinutes,
     planned: false,
-    plan: carried,
+    plan: [...routineItems(date, settings), ...carried],
     segments: [],
     status: 'active',
     previousDate: previous?.date,
@@ -310,9 +329,89 @@ export function closeDay(
     plan,
     status: 'closed',
     focus: undefined,
+    focusSession: undefined,
     summary: { ...summary, closedAt: now.toISOString() },
   })
 }
 
 /** Lets you keep working after closing by accident. The summary is kept. */
 export const reopenDay = (day: DayRecord): DayRecord => touch(day, { status: 'active' })
+
+/* ---------- Editing, notes, focus timer, time away ---------- */
+
+/** Replaces all blocks (from the edit dialog), sorted by start. At most one may be running. */
+export function replaceSegments(day: DayRecord, segments: Segment[]): DayRecord {
+  const sorted = [...segments].sort((a, b) => a.start.localeCompare(b.start))
+  return touch(day, { segments: sorted })
+}
+
+export const setNotes = (day: DayRecord, notes: string): DayRecord =>
+  (day.notes ?? '') === notes ? day : touch(day, { notes: notes || undefined })
+
+export function startFocusSession(
+  day: DayRecord,
+  now: Date,
+  preset: { workMinutes: number; breakMinutes: number },
+): DayRecord {
+  const session: FocusSession = { ...preset, startedAt: now.toISOString(), cycles: 0 }
+  const started = touch(day, { focusSession: session })
+  return dayState(started) === 'working' ? started : startWork(started, now)
+}
+
+export const endFocusSession = (day: DayRecord): DayRecord =>
+  day.focusSession ? touch(day, { focusSession: undefined }) : day
+
+/** Work time in the current focus stretch: since the session started or its last break ended. */
+export function focusWorkMs(day: DayRecord, now: Date): number {
+  const session = day.focusSession
+  const open = openSegment(day)
+  if (!session || !open || open.kind !== 'work') return 0
+  const since = Math.max(
+    new Date(session.startedAt).getTime(),
+    ...day.segments
+      .filter((s) => s.kind === 'break' && s.end)
+      .map((s) => new Date(s.end!).getTime()),
+  )
+  return day.segments
+    .filter((s) => s.kind === 'work')
+    .reduce((sum, s) => {
+      const start = Math.max(new Date(s.start).getTime(), since)
+      const end = s.end ? new Date(s.end).getTime() : now.getTime()
+      return sum + Math.max(0, end - start)
+    }, 0)
+}
+
+/** Ends a focus stretch: counts the cycle and starts the focus break. */
+export function focusBreak(day: DayRecord, now: Date): DayRecord {
+  if (!day.focusSession) return day
+  const counted = touch(day, {
+    focusSession: { ...day.focusSession, cycles: day.focusSession.cycles + 1 },
+  })
+  return startBreak(counted, now, 'focus')
+}
+
+export type AwayChoice = 'work' | 'break' | 'none'
+
+/**
+ * Resolves time away while the clock was running (from → to).
+ * work: keep it. break: record it as a break. none: drop it; the clock continues from `to`.
+ */
+export function resolveAway(day: DayRecord, from: Date, to: Date, choice: AwayChoice): DayRecord {
+  const open = openSegment(day)
+  if (choice === 'work' || !open || open.kind !== 'work') return day
+  const cut = new Date(Math.max(from.getTime(), new Date(open.start).getTime()))
+  const segments = day.segments.map((s) =>
+    s.id === open.id ? { ...s, end: cut.toISOString() } : s,
+  )
+  if (choice === 'break') {
+    segments.push({
+      id: createId(),
+      kind: 'break',
+      breakType: 'away',
+      start: cut.toISOString(),
+      end: to.toISOString(),
+    })
+  }
+  segments.push({ ...open, id: createId(), start: to.toISOString(), end: undefined })
+  return touch(day, { segments })
+}

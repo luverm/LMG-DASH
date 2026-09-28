@@ -87,3 +87,19 @@
   display: flex;
   justify-content: center;
 }
+
+.notes {
+  margin-top: var(--space-3);
+  font-size: 0.9rem;
+}
+
+.notes summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.notes p {
+  margin: var(--space-2) 0 0;
+  white-space: pre-wrap;
+}

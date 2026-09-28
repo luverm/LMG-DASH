@@ -34,6 +34,7 @@ export function mergeDay(local: DayRecord, remote: DayRecord): DayRecord {
     segments: fixed,
     status: local.status === 'closed' || remote.status === 'closed' ? 'closed' : 'active',
     summary: local.summary ?? remote.summary,
+    notes: local.notes ?? remote.notes,
     updatedAt: local.updatedAt > remote.updatedAt ? local.updatedAt : remote.updatedAt,
   }
 }

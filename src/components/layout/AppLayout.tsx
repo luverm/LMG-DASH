@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, NavLink, Outlet, useLocation } from 'react-router'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import { daysUntil } from '@/app/data/connection'
 import { useData } from '@/app/data/DataContext'
 import { ToastProvider } from '@/components/feedback/ToastProvider'
@@ -11,7 +11,10 @@ import { QuickCaptureDialog } from '@/features/projects/components/QuickCaptureD
 import { QuickCaptureContext } from '@/features/projects/QuickCaptureContext'
 import { ProjectsProvider } from '@/features/projects/ProjectsProvider'
 import { WorkdayProvider } from '@/features/workday/WorkdayProvider'
+import { Dialog } from '@/components/ui/Dialog'
+import { useShortcuts } from '@/hooks/useShortcuts'
 import { SaveIndicator } from './SaveIndicator'
+import { ShortcutList } from './ShortcutList'
 import { TopBar } from './TopBar'
 import styles from './AppLayout.module.css'
 
@@ -19,7 +22,16 @@ export function AppLayout() {
   const { mode, tokenExpiresAt } = useData()
   const [capturing, setCapturing] = useState(false)
   const expiresIn = daysUntil(tokenExpiresAt)
+  const [showShortcuts, setShowShortcuts] = useState(false)
+  const navigate = useNavigate()
   const { pathname } = useLocation()
+  useShortcuts({
+    w: () => setCapturing(true),
+    '?': () => setShowShortcuts(true),
+    '1': () => navigate('/'),
+    '2': () => navigate('/projects'),
+    '3': () => navigate('/history'),
+  })
   useEffect(() => window.scrollTo?.(0, 0), [pathname])
 
   return (
@@ -67,6 +79,16 @@ export function AppLayout() {
               <ProjectsProvider>
                 <Outlet />
                 {capturing && <QuickCaptureDialog onClose={() => setCapturing(false)} />}
+                {showShortcuts && (
+                  <Dialog
+                    title="Keyboard shortcuts"
+                    shape="square"
+                    wide
+                    onClose={() => setShowShortcuts(false)}
+                  >
+                    <ShortcutList />
+                  </Dialog>
+                )}
               </ProjectsProvider>
             </WorkdayProvider>
           </main>

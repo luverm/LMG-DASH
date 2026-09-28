@@ -150,3 +150,14 @@
     min-width: 0;
   }
 }
+
+.notes {
+  margin: 0;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+  max-height: 10rem;
+  overflow-y: auto;
+}

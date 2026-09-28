@@ -1,0 +1,35 @@
+.timer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--lavender) 45%, var(--border));
+  border-radius: 999px;
+  overflow: hidden;
+  font-size: 0.875rem;
+}
+
+.bar {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: color-mix(in srgb, var(--lavender) 14%, transparent);
+  transform-origin: left;
+  transform: scaleX(var(--p));
+  transition: transform 900ms var(--ease-out);
+}
+
+.onBreak {
+  border-color: color-mix(in srgb, var(--peach) 45%, var(--border));
+}
+
+.onBreak .bar {
+  background: color-mix(in srgb, var(--peach) 14%, transparent);
+}
+
+.label {
+  font-weight: 650;
+}

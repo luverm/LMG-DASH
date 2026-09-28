@@ -62,7 +62,7 @@ Worked ${formatDuration(workMs)}, breaks ${formatDuration(breakMs)}.
 Time per focus:
 ${focus || '- (none)'}
 
-My draft:
+${day.notes ? `My scratchpad from today:\n${day.notes}\n\n` : ''}My draft:
 Done today:
 ${draft.done || '-'}
 
