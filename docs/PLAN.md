@@ -233,6 +233,25 @@ The app is hosted entirely on GitHub, with no other services and no server to ru
 
 On a personal GitHub account, **a Pages site built from a private repo is still publicly reachable**. Access-controlled Pages exists only for organisations on GitHub Enterprise Cloud. Deploying Pages from a private repo also requires GitHub Pro. This is acceptable here because the published site is only the app shell: without your token it shows the connect screen and no data. All real content stays in the private data repo.
 
+### Keeping the data safe with a public code repo
+
+Making `lmg-dash` public is fine: it contains only code. The data lives in the private `lmg-dash-data` repo, and neither the public repo nor the public site can read it without your token. The rules that keep it that way:
+
+1. **No data or secrets in the code repo, ever.**
+   - Tests and examples use made-up names only.
+   - The token is never put in a `VITE_*` variable or `.env` file, because those get baked into the public build. It's only entered at runtime in the browser.
+2. **A minimal token.**
+   - Fine-grained, for the `lmg-dash-data` repo only, with "Contents: read and write" and nothing else.
+   - It has an expiry date (e.g. 1 year); the app warns 2 weeks before it runs out.
+   - If it leaks, revoke it on GitHub and the data is locked again.
+3. **Token locked with a passphrase.** The token is stored in the browser encrypted (Web Crypto: AES-GCM, key derived from your passphrase with PBKDF2). You enter the passphrase once per browser session, so someone with access to your laptop's browser storage can't just copy a usable token. A "Lock" button and an auto-lock after 8h idle clear the unlocked copy.
+4. **No third-party code at runtime.**
+   - No analytics, CDNs or external fonts.
+   - A strict Content-Security-Policy allows network requests only to `api.github.com`, so injected script can't send data anywhere else.
+5. **Secret scanning and push protection** are turned on for both repos, so a token accidentally committed is blocked.
+
+**Optional, off by default: encrypted data files.** The data files can also be encrypted with the passphrase before they're committed, so even the private repo only contains ciphertext. The downside is that Claude can no longer read them through the GitHub connector, and git diffs become unreadable. It's worth it only if company rules require it.
+
 ## 6. Data model (v1)
 
 ```ts
@@ -342,7 +361,7 @@ State management uses `useReducer` and context, with no extra dependencies. Anim
 ## 8. Build order
 
 1. **Theme and shapes**: tokens, `Shape`, `ShapeButton` with press animations, the drifting backdrop, and the top bar.
-2. **Hosting & storage**: the Pages deploy workflow, the connect-with-token screen, the GitHub client and the save queue with the saved/saving/offline indicator. Tested against a mocked GitHub API, including the sha-conflict merge.
+2. **Hosting & storage**: the Pages deploy workflow, the connect-with-token screen with passphrase lock and CSP, the GitHub client and the save queue with the saved/saving/offline indicator. Tested against a mocked GitHub API, including the sha-conflict merge.
 3. **Workday model**: types, reducer, selectors and repositories, with unit tests for timing, state transitions, focus splits and overnight recovery.
 4. **Today screen**: clock ring with target, controls, break menu, focus input and timeline.
 5. **Day planning**: plan helpers with tests, the "Plan your day" panel, the plan list on Today, and starting work from an item.
