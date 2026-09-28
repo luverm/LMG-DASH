@@ -1,0 +1,55 @@
+.track {
+  position: relative;
+  height: 18px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text-muted) 10%, transparent);
+  overflow: hidden;
+}
+
+.compact .track {
+  height: 8px;
+}
+
+.block {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+  transition: width 900ms var(--ease-out);
+}
+
+.work {
+  background: var(--mint);
+}
+
+.break {
+  background: var(--peach);
+}
+
+.running {
+  animation: glow 2.5s ease-in-out infinite;
+}
+
+.axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-1);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.empty {
+  padding: var(--space-3);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+@keyframes glow {
+  50% {
+    opacity: 0.7;
+  }
+}

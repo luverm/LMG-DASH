@@ -1,0 +1,80 @@
+.gate {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6) var(--space-4);
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-6);
+  font-size: 1.25rem;
+}
+
+.lead {
+  margin: 0 0 var(--space-4);
+  color: var(--text-muted);
+}
+
+.steps {
+  margin: 0 0 var(--space-5);
+  padding-left: 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.steps em {
+  color: var(--text);
+  font-style: normal;
+}
+
+.form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.form > button {
+  justify-self: start;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.error {
+  margin: 0;
+  color: var(--rose);
+  font-size: 0.9rem;
+}
+
+.alt {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-4);
+}
+
+code {
+  font-size: 0.85em;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  background: var(--surface-raised);
+}
+
+@media (max-width: 520px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

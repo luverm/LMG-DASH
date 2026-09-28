@@ -1,0 +1,64 @@
+.wrap {
+  position: relative;
+  width: 260px;
+  height: 260px;
+  margin: 0 auto;
+}
+
+.breathing {
+  animation: breathe 5s ease-in-out infinite;
+}
+
+.track {
+  stroke: color-mix(in srgb, var(--text-muted) 16%, transparent);
+}
+
+.progress {
+  transition:
+    stroke-dashoffset 900ms var(--ease-out),
+    stroke var(--dur);
+}
+
+.center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.state {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 550;
+}
+
+.time {
+  font-size: 2.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sub {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@media (max-width: 400px) {
+  .wrap {
+    transform: scale(0.85);
+  }
+}

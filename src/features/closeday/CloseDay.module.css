@@ -1,0 +1,123 @@
+.stats {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.section {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.section h3 {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.review {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.review li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.itemTitle {
+  min-width: 0;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.segmented button {
+  padding: 0.2rem 0.7rem;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast),
+    color var(--dur-fast);
+}
+
+.segmented .selected {
+  background: var(--sky);
+  color: var(--on-pastel);
+  font-weight: 600;
+}
+
+.moods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.mood {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 84px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast),
+    transform var(--dur) var(--ease-spring);
+}
+
+.mood:active {
+  transform: scale(0.94);
+}
+
+.moodActive {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.summary {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+}
+
+.summary dt {
+  margin-top: var(--space-2);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--sky);
+}
+
+.summary dd {
+  margin: 0;
+  white-space: pre-wrap;
+}

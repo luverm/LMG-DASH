@@ -1,0 +1,62 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  animation: fade 300ms var(--ease-out);
+}
+
+.pile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.row {
+  display: flex;
+  gap: 2px;
+}
+
+.shape {
+  display: inline-flex;
+  opacity: 0;
+  animation: drop 620ms var(--ease-spring) forwards;
+}
+
+.caption {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-muted);
+  opacity: 0;
+  animation: fade 400ms var(--ease-out) 700ms forwards;
+}
+
+@keyframes drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-60vh) rotate(var(--tilt));
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(6px) rotate(calc(var(--tilt) / -3));
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

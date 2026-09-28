@@ -1,0 +1,155 @@
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+  user-select: none;
+  transition:
+    transform var(--dur) var(--ease-spring),
+    background-color var(--dur-fast),
+    border-color var(--dur-fast),
+    opacity var(--dur-fast);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.94);
+  transition-duration: 80ms;
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sm {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.md {
+  padding: 0.55rem 1.1rem;
+  font-size: 0.9375rem;
+}
+
+.lg {
+  padding: 0.85rem 1.6rem;
+  font-size: 1.0625rem;
+}
+
+.solid {
+  background: var(--accent);
+  color: var(--on-pastel);
+}
+
+.solid:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.soft {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--accent);
+}
+
+.soft:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.ghost:hover:not(:disabled) {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+/* Shape-specific press accents */
+.animate.triangle {
+  animation: wobble 420ms var(--ease-out);
+}
+
+.animate.hexagon {
+  animation: pop 380ms var(--ease-spring);
+}
+
+.animate.square {
+  animation: squish 320ms var(--ease-spring);
+}
+
+.circle::after {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.animate.circle::after {
+  animation: ripple 520ms var(--ease-out);
+}
+
+@keyframes wobble {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(-4deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+  75% {
+    transform: rotate(-1.5deg);
+  }
+}
+
+@keyframes pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.07);
+  }
+}
+
+@keyframes squish {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.06, 0.92);
+  }
+  70% {
+    transform: scale(0.98, 1.03);
+  }
+}
+
+@keyframes ripple {
+  from {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.18, 1.45);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate,
+  .animate::after {
+    animation: none !important;
+  }
+}
