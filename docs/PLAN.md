@@ -1,6 +1,6 @@
 # Work dashboard plan
 
-A calm, playful work timer: start a clock, take breaks, close the day with a short summary, and pick up where you left off tomorrow.
+A calm, playful work timer: plan the day, start a clock, take breaks, close the day with a short summary, and pick up where you left off tomorrow.
 
 ## 1. Brainstorm (20 features)
 
@@ -25,6 +25,8 @@ A calm, playful work timer: start a clock, take breaks, close the day with a sho
 19. **Scratchpad notes**: quick notes during the day that feed into the summary.
 20. **Live tab title**: shows the running time (e.g. "1:42 · Working").
 
+**Added later:** 21. **Day planning**: a short list of what you intend to do today, with rough time estimates, that you work through during the day.
+
 Other ideas that didn't make the list: streaks, sound effects, projects/categories, and calendar sync.
 
 ## 2. Narrowed to 10 (v1)
@@ -37,12 +39,14 @@ Other ideas that didn't make the list: streaks, sound effects, projects/categori
 | 4   | Day timeline                                 | All      | Shows the whole day at a glance, calmly            |
 | 5   | Daily target progress ring                   | Circle   | Doubles as the clock face, so no extra clutter     |
 | 6   | Close workday + auto-drafted summary         | Square   | Explicitly requested; the auto-draft saves typing  |
-| 7   | Resume card ("pick up where you left off")   | Square   | This is where the summary pays off                 |
+| 7   | Day planning (absorbs the resume card)       | Hexagon  | Gives the day a shape; unfinished items carry over |
 | 8   | Gentle break nudge                           | Triangle | Keeps the app healthy to use, not just a tracker   |
 | 9   | Local persistence + forgotten-timer recovery | –        | A timer that loses data or runs for 14h is useless |
 | 10  | History of past days                         | Square   | Somewhere for the summaries to live                |
 
 **Parked for later:** Pomodoro presets, weekly stats, entry editing (beyond recovery), keyboard shortcuts, export, idle detection, scratchpad and live tab title. Shortcuts and the tab title are cheap and would be the first extras.
+
+The resume card from the first draft now lives at the top of the day plan: yesterday's unfinished items and "next up" become today's starting list. The list stays at 10 without losing the resume idea.
 
 ## 3. Look and feel
 
@@ -94,8 +98,6 @@ The Today screen has one primary action visible at a time, and the main button c
  ┌──────────────────────────────────────────────┐
  │  LMG Dash                 Today · History    │
  ├──────────────────────────────────────────────┤
- │  [Resume card: yesterday's "next up"]  (x)   │
- │                                              │
  │               ◯  3:12:45                     │
  │            (ring = target 8h)                │
  │         ⬡ Working on: invoice export         │
@@ -103,6 +105,13 @@ The Today screen has one primary action visible at a time, and the main button c
  │     [ ◯ Pause ]  [ △ Break ▾ ]  [ □ Close ]  │
  │                                              │
  │  ▇▇▇▇▇△▇▇▇▇▇▇▇△△▇▇▇▇  timeline              │
+ │                                              │
+ │  Today's plan                  5h 30 / 8h    │
+ │   ⬡ ✓ Review PRs                 45m / 1h    │
+ │   ⬢ ▶ Invoice export           1h 20 / 2h    │
+ │   ⬡   Team sync                      30m     │
+ │   ⬡   Write docs                     2h      │
+ │   + Add item                                 │
  └──────────────────────────────────────────────┘
 ```
 
@@ -125,16 +134,29 @@ idle ──start──▶ working ◀──resume/end break──▶ on break
 - **Break nudge**: after 50 min of continuous work, a small triangle toast offers "Take a break?" with Break or Snooze 15 min. It never blocks.
 - **Forgotten-timer recovery**: if the app opens and a block started on a previous day is still open, ask "You were still clocked in. When did you stop?" with a time picker defaulting to the last activity.
 
+### Day planning
+
+- **Starting the day**: the first time you open the app on a new day, a small "Plan your day" panel appears instead of the bare Start button. It is prefilled with:
+  - yesterday's unfinished plan items (carried over), and
+  - yesterday's "next up" and blockers from the close-day summary (the old resume card).
+- **Plan items**: each is a title and an optional time estimate (15m steps). Items can be reordered by dragging, removed, or added with a single input where Enter adds the next one.
+- **Planned vs target**: the panel shows the total estimate next to the daily target. If you plan more than the target, the total turns rose with a soft note ("That's 9h 30 for an 8h day"). It never blocks.
+- **Skipping**: "Just start" skips planning entirely; you can plan later from the Today screen.
+- **Working from the plan**: pressing ▶ on a plan item starts the clock (or switches to it) and sets it as the current focus. Each item shows time spent against its estimate and turns rose once it runs over. Free-text focus is still possible for unplanned work.
+- **Ticking off**: check an item to mark it done (the hexagon fills in with a small pop). If it was the running item, the clock keeps running with no focus and asks "What's next?" by highlighting the next open item.
+- **Mid-day changes**: items can be added, edited or reordered at any time without affecting tracked time.
+
 ### Close workday flow
 
 1. The Close button opens a dialog showing the day's totals (work, breaks, per-focus breakdown) and the timeline.
 2. Fields are prefilled where possible:
-   - **Done today**: prefilled with the focus labels and their durations, editable.
-   - **Next up**: where to pick up tomorrow.
+   - **Plan review**: each open plan item gets a choice of Done, Carry over (the default) or Drop.
+   - **Done today**: prefilled with completed plan items and other focus labels with their durations, editable.
+   - **Next up**: prefilled with the carried-over items, editable.
    - **Blockers**: optional.
    - **Mood**: pick one of four shapes.
 3. Save closes any open block, marks the day closed, plays the stacking animation and stores the summary.
-4. On the next day, the Resume card shows "Next up" and blockers, and one click copies "Next up" into the focus label.
+4. On the next day, carried-over items and "next up" seed the "Plan your day" panel.
 
 ## 5. Data model (localStorage, v1)
 
@@ -147,8 +169,17 @@ interface Segment {
   kind: SegmentKind
   breakType?: BreakType
   focus?: string
+  planItemId?: string // set when started from a plan item
   start: string // ISO timestamp
   end?: string // open while running
+}
+
+interface PlanItem {
+  id: string
+  title: string
+  estimateMinutes?: number
+  status: 'open' | 'done' | 'dropped'
+  carriedFrom?: string // YYYY-MM-DD of the day it was carried over from
 }
 
 interface DaySummary {
@@ -162,6 +193,7 @@ interface DaySummary {
 interface DayRecord {
   date: string // YYYY-MM-DD, local
   targetMinutes: number
+  plan: PlanItem[] // array order is the display order
   segments: Segment[]
   status: 'active' | 'closed'
   summary?: DaySummary
@@ -187,7 +219,10 @@ src/
       WorkdayProvider.tsx context + 1s tick
       TodayPage.tsx
       components/       ClockRing, ControlBar, BreakMenu, FocusInput, Timeline,
-                        BreakNudge, RecoveryDialog, CloseWorkdayDialog, ResumeCard
+                        BreakNudge, RecoveryDialog, CloseWorkdayDialog
+    planning/
+      plan.ts           pure helpers: add/reorder/complete, carry-over, planned vs spent
+      components/       PlanYourDay (start-of-day panel), PlanList, PlanItemRow
     history/
       HistoryPage.tsx   list of past days: totals, mini timeline, summary
   styles/               tokens.css (palette, motion), global.css
@@ -200,9 +235,10 @@ State management uses `useReducer` and context, with no extra dependencies. Anim
 1. **Theme and shapes**: tokens, `Shape`, `ShapeButton` with press animations, the drifting backdrop, and the top bar.
 2. **Workday model**: types, reducer, selectors and storage, with unit tests for timing, state transitions, focus splits and overnight recovery.
 3. **Today screen**: clock ring with target, controls, break menu, focus input and timeline.
-4. **Close workday and resume**: the dialog, auto-draft, stacking animation and resume card.
-5. **History and nudge**: the history page and the break nudge toast.
-6. **Polish**: reduced motion, focus rings and ARIA labels, empty states, and a mobile layout pass.
+4. **Day planning**: plan helpers with tests, the "Plan your day" panel, the plan list on Today, and starting work from an item.
+5. **Close workday and carry-over**: the dialog with plan review, auto-draft, the stacking animation, and seeding the next day's plan.
+6. **History and nudge**: the history page and the break nudge toast.
+7. **Polish**: reduced motion, focus rings and ARIA labels, empty states, and a mobile layout pass.
 
 Each step is its own commit and keeps lint, typecheck, tests and build green.
 
@@ -212,3 +248,4 @@ Each step is its own commit and keeps lint, typecheck, tests and build green.
 - Break nudge after **50 min** of continuous work.
 - Data stays **local to the browser** in v1, with no accounts or sync.
 - Break types: **coffee, lunch, walk, other**.
+- Planning is a **task list with time estimates**, not a clock-time schedule (e.g. "10:00–11:30"). Open items **carry over** by default.
