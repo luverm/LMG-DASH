@@ -133,7 +133,6 @@ export function PlanItemRow({
             shape="circle"
             size="sm"
             variant="ghost"
-            showIcon={false}
             onClick={onStart}
             aria-label={`Start "${item.title}"`}
             title="Work on this"

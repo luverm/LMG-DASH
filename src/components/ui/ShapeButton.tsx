@@ -1,29 +1,25 @@
 import { useRef, type ButtonHTMLAttributes, type PointerEvent } from 'react'
-import { Shape } from '@/components/shapes/Shape'
 import { shapeColor, type ShapeKind } from '@/components/shapes/shapes'
 import styles from './ShapeButton.module.css'
 
 interface ShapeButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  /** Sets the color and the press animation; the button itself shows only its label. */
   shape: ShapeKind
   /** solid: pastel fill (primary). soft: tinted. ghost: text only. */
   variant?: 'solid' | 'soft' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   color?: string
-  showIcon?: boolean
-  iconFilled?: boolean
 }
 
 /**
- * Button with a shape icon and a shape-specific press animation:
- * circle ripples, triangle wobbles, hexagon turns 60°, square squishes.
+ * Text button with a shape-specific press animation:
+ * circle ripples, triangle wobbles, hexagon pops, square squishes.
  */
 export function ShapeButton({
   shape,
   variant = 'soft',
   size = 'md',
   color = shapeColor[shape],
-  showIcon = true,
-  iconFilled,
   className,
   children,
   onPointerDown,
@@ -43,7 +39,6 @@ export function ShapeButton({
     onPointerDown?.(e)
   }
 
-  const iconColor = variant === 'solid' ? 'var(--on-pastel)' : color
   return (
     <button
       ref={ref}
@@ -56,17 +51,7 @@ export function ShapeButton({
       onAnimationEnd={(e) => e.currentTarget.classList.remove(styles.animate)}
       {...rest}
     >
-      {showIcon && (
-        <span className={styles.icon}>
-          <Shape
-            kind={shape}
-            color={iconColor}
-            size={size === 'lg' ? 22 : size === 'sm' ? 14 : 18}
-            filled={iconFilled}
-          />
-        </span>
-      )}
-      {children != null && <span>{children}</span>}
+      {children}
     </button>
   )
 }

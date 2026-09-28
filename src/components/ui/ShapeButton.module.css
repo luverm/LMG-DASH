@@ -3,7 +3,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
   border: 1.5px solid transparent;
   border-radius: 999px;
   cursor: pointer;
@@ -71,17 +70,13 @@
   background: color-mix(in srgb, var(--accent) 10%, transparent);
 }
 
-.icon {
-  display: inline-flex;
-}
-
 /* Shape-specific press accents */
-.animate.triangle .icon {
+.animate.triangle {
   animation: wobble 420ms var(--ease-out);
 }
 
-.animate.hexagon .icon {
-  animation: turn 420ms var(--ease-spring);
+.animate.hexagon {
+  animation: pop 380ms var(--ease-spring);
 }
 
 .animate.square {
@@ -108,22 +103,23 @@
     transform: rotate(0);
   }
   25% {
-    transform: rotate(-8deg);
+    transform: rotate(-4deg);
   }
   50% {
-    transform: rotate(6deg);
+    transform: rotate(3deg);
   }
   75% {
-    transform: rotate(-3deg);
+    transform: rotate(-1.5deg);
   }
 }
 
-@keyframes turn {
-  from {
-    transform: rotate(0);
+@keyframes pop {
+  0%,
+  100% {
+    transform: scale(1);
   }
-  to {
-    transform: rotate(60deg);
+  45% {
+    transform: scale(1.07);
   }
 }
 
@@ -152,7 +148,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate .icon,
   .animate,
   .animate::after {
     animation: none !important;
