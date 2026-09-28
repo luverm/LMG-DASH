@@ -5,7 +5,7 @@ import { ShapeButton } from '@/components/ui/ShapeButton'
 import { dateKey } from '@/lib/time'
 import { newDay, openSegment, stopAt } from './day'
 import { mergeDay, mergeSettings } from './merge'
-import { defaultSettings, type DayRecord, type Settings } from './types'
+import { withDefaults, type DayRecord, type Settings } from './types'
 import { WorkdayContext, type DayOp, type WorkdayContextValue } from './WorkdayContext'
 
 interface Loaded {
@@ -21,6 +21,7 @@ export function WorkdayProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null)
   const [attempt, setAttempt] = useState(0)
   const ref = useRef<Loaded | null>(null)
+  const rawSettings = useRef<Settings | null>(null)
 
   const commit = useCallback((next: Loaded) => {
     ref.current = next
@@ -30,8 +31,9 @@ export function WorkdayProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const settings =
-        (await engine.load<Settings>(paths.settings, { merge: mergeSettings })) ?? defaultSettings
+      const settings = withDefaults(
+        await engine.load<Settings>(paths.settings, { merge: mergeSettings }),
+      )
       let today = await engine.load<DayRecord>(paths.day(dateKeyNow), { merge: mergeDay })
       const previousDate =
         today?.previousDate ??
@@ -57,8 +59,11 @@ export function WorkdayProvider({ children }: { children: ReactNode }) {
         const cur = ref.current
         if (!cur) return
         const today = engine.peek<DayRecord>(paths.day(cur.today.date))
-        const settings = engine.peek<Settings>(paths.settings)
-        if ((today && today !== cur.today) || (settings && settings !== cur.settings)) {
+        const raw = engine.peek<Settings>(paths.settings)
+        const changed = raw && raw !== rawSettings.current
+        if (changed) rawSettings.current = raw
+        const settings = changed && raw !== cur.settings ? withDefaults(raw) : null
+        if ((today && today !== cur.today) || settings) {
           commit({ ...cur, today: today ?? cur.today, settings: settings ?? cur.settings })
         }
       }),

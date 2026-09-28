@@ -140,6 +140,12 @@ export function CloseDayDialog({ day, onCancel, onClosed, projectName }: CloseDa
       )}
 
       <section className={styles.section}>
+        {day.notes && (
+          <div className="field">
+            <span>Your scratchpad</span>
+            <p className={styles.notes}>{day.notes}</p>
+          </div>
+        )}
         <label className="field">
           <span>Done today</span>
           <textarea

@@ -1,0 +1,137 @@
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.empty {
+  color: var(--text-muted);
+}
+
+.block {
+  display: grid;
+  grid-template-columns: auto 128px 128px minmax(0, 1fr) 56px 32px;
+  align-items: end;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--mint);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.break {
+  border-left-color: var(--peach);
+}
+
+.kind {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  align-self: center;
+}
+
+.kind button {
+  padding: 0.25rem 0.7rem;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.work .kindActive {
+  background: var(--mint);
+  color: var(--on-pastel);
+  font-weight: 650;
+}
+
+.break .kindActive {
+  background: var(--peach);
+  color: var(--on-pastel);
+  font-weight: 650;
+}
+
+.time {
+  display: grid;
+  gap: 2px;
+}
+
+.time span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.running {
+  height: 38px;
+  border: 1px dashed var(--mint);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--mint);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.duration {
+  align-self: center;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.delete {
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.delete:hover {
+  color: var(--rose);
+  background: var(--surface-raised);
+}
+
+.error {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--rose);
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 600px) {
+  .block {
+    grid-template-columns: 1fr 1fr 40px;
+    align-items: center;
+  }
+
+  .kind {
+    grid-column: 1 / 3;
+    justify-self: start;
+  }
+
+  .delete {
+    grid-column: 3;
+    grid-row: 1;
+    width: 40px;
+    height: 40px;
+  }
+
+  .label {
+    grid-column: 1 / 3;
+  }
+
+  .duration {
+    grid-column: 3;
+    text-align: center;
+  }
+}

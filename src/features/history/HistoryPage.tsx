@@ -8,20 +8,19 @@ import { totals } from '@/features/workday/day'
 import type { DayRecord } from '@/features/workday/types'
 import { useWorkday } from '@/features/workday/WorkdayContext'
 import { useNow } from '@/hooks/useNow'
-import { dateKey, formatDayLabel, formatDuration, parseDateKey } from '@/lib/time'
+import { formatDayLabel, formatDuration } from '@/lib/time'
+import { EditBlocksDialog } from '@/features/editing/EditBlocksDialog'
+import { replaceSegments } from '@/features/workday/day'
+import { mergeDay } from '@/features/workday/merge'
+import { WeekOverview } from './WeekOverview'
 import styles from './History.module.css'
 
 const PAGE = 14
 
-function startOfWeek(key: string): string {
-  const monday = parseDateKey(key)
-  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7))
-  return dateKey(monday)
-}
-
 export function HistoryPage() {
   const { engine, paths } = useData()
-  const { today } = useWorkday()
+  const { today, update } = useWorkday()
+  const [editing, setEditing] = useState<DayRecord | null>(null)
   const [dates, setDates] = useState<string[] | null>(null)
   const [days, setDays] = useState<Record<string, DayRecord>>({})
   const [shown, setShown] = useState(PAGE)
@@ -74,10 +73,6 @@ export function HistoryPage() {
     ...(today.segments.length ? [today] : []),
     ...visible.map((d) => days[d]).filter(Boolean),
   ]
-  const week = startOfWeek(today.date)
-  const weekMs = list
-    .filter((d) => d.date >= week)
-    .reduce((sum, d) => sum + totals(d, now).workMs, 0)
   const hasMore = (dates?.filter((d) => d !== today.date).length ?? 0) > shown
 
   return (
@@ -86,12 +81,9 @@ export function HistoryPage() {
         <h1>
           <Shape kind="square" size={26} /> History
         </h1>
-        {weekMs > 0 && (
-          <span className={styles.week}>
-            <Shape kind="circle" size={14} filled /> {formatDuration(weekMs)} this week
-          </span>
-        )}
       </header>
+
+      <WeekOverview now={now} />
 
       {error && <p className={styles.error}>Couldn't load history: {error}</p>}
       {dates && list.length === 0 && (
@@ -126,10 +118,24 @@ export function HistoryPage() {
                 {day.status !== 'closed' && day.date !== today.date && (
                   <span className={styles.tag}>not closed</span>
                 )}
+                <ShapeButton
+                  shape="circle"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setEditing(day)}
+                >
+                  Edit
+                </ShapeButton>
               </span>
             }
           >
             <Timeline day={day} now={now} compact />
+            {day.notes && (
+              <details className={styles.notes}>
+                <summary>Scratchpad</summary>
+                <p>{day.notes}</p>
+              </details>
+            )}
             {day.summary ? (
               <div className={styles.summary}>
                 {day.summary.done && (
@@ -169,6 +175,22 @@ export function HistoryPage() {
           </Card>
         )
       })}
+
+      {editing && (
+        <EditBlocksDialog
+          day={editing}
+          onClose={() => setEditing(null)}
+          onSave={(segments) => {
+            if (editing.date === today.date) {
+              update((d) => replaceSegments(d, segments), { immediate: true })
+              return
+            }
+            const updated = replaceSegments(editing, segments)
+            engine.set(paths.day(updated.date), updated, { merge: mergeDay, immediate: true })
+            setDays((cur) => ({ ...cur, [updated.date]: updated }))
+          }}
+        />
+      )}
 
       {hasMore && (
         <div className={styles.more}>

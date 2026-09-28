@@ -21,7 +21,15 @@ The full plan is in [`docs/PLAN.md`](docs/PLAN.md).
 - **Forgotten clock:** if the clock ran past midnight, the app asks when you actually stopped.
 - **Projects & wishes:** note coworkers' wishes in seconds (the **Wish** button, from any page). Track the problem, wish, approach, impact/effort, links and notes. Time on plan items linked to a project adds up per project.
 - **Claude, on your subscription:** "Copy for Claude" buttons copy a prompt with context and open claude.ai. The app itself never calls an AI API.
-- **History:** past days with totals, timeline and summary.
+- **History:** a weekly overview (hours per day against your target, time per project, done items) and past days with totals, timeline, summary and notes.
+- **Edit times:** fix a forgotten stop, change start and end times, turn work into a break, add or delete blocks, today or on any past day.
+- **Focus timer:** optional 25/5 or 50/10 cycles that start the break for you.
+- **Scratchpad:** quick notes during the day, shown when you close the day.
+- **Routines:** plan items that add themselves on chosen weekdays (e.g. a standup).
+- **Away detection (desktop):** after a long time away with the clock running, it asks whether that was work, a break, or not working.
+- **Export & backup:** Markdown or CSV reports, plus a full JSON backup you can restore.
+- **Keyboard shortcuts:** Space, B, F, N, E, C on Today; W, 1/2/3 and ? anywhere.
+- **Install as an app:** add it to your home screen for a full-screen app. Optional system notifications for breaks and the focus timer.
 
 ## Where your data lives
 
