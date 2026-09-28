@@ -20,20 +20,37 @@
 .settings {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
+  color: var(--text-muted);
   transition:
     background-color var(--dur-fast),
-    transform var(--dur) var(--ease-spring);
+    color var(--dur-fast);
+}
+
+.settings svg {
+  transition: transform 600ms var(--ease-spring);
 }
 
 .settings:hover {
+  color: var(--sky);
   background: var(--surface);
 }
 
-.settings:active {
-  transform: rotate(45deg) scale(0.9);
+/* The gear turns one tooth on hover and a bit more on press. */
+.settings:hover svg {
+  transform: rotate(45deg);
+}
+
+.settings:active svg {
+  transform: rotate(90deg) scale(0.9);
+  transition-duration: 200ms;
+}
+
+.settingsActive {
+  color: var(--sky);
+  background: var(--surface-raised);
 }
 
 .banner {
