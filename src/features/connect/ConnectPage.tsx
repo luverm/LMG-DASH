@@ -18,6 +18,7 @@ export function ConnectPage({ onConnected }: ConnectPageProps) {
   const [token, setToken] = useState('')
   const [passphrase, setPassphrase] = useState('')
   const [repeat, setRepeat] = useState('')
+  const [expiry, setExpiry] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -47,7 +48,9 @@ export function ConnectPage({ onConnected }: ConnectPageProps) {
           repo: name,
           login: access.login,
           sealedToken,
-          tokenExpiresAt: access.tokenExpiresAt,
+          tokenExpiresAt:
+            access.tokenExpiresAt ??
+            (expiry ? new Date(`${expiry}T00:00:00`).toISOString() : undefined),
         },
         token.trim(),
       )
@@ -105,6 +108,15 @@ export function ConnectPage({ onConnected }: ConnectPageProps) {
               onChange={(e) => setToken(e.target.value)}
               autoComplete="off"
               required
+            />
+          </label>
+          <label className="field">
+            <span>Token expiry date (optional, for a reminder before it runs out)</span>
+            <input
+              className="input"
+              type="date"
+              value={expiry}
+              onChange={(e) => setExpiry(e.target.value)}
             />
           </label>
           <div className={styles.row}>

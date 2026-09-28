@@ -1,5 +1,7 @@
 # Work dashboard plan
 
+> **Status:** v1 is built. All 10 core features plus day planning, projects & wishes, GitHub storage and the "Copy for Claude" buttons are in. Still parked: Pomodoro presets, weekly stats chart, editing past entries, keyboard shortcuts, export, idle detection and the scratchpad.
+
 A calm, playful work timer and project notebook: keep track of the solutions coworkers ask for, plan the day, start a clock, take breaks, close the day with a short summary, and pick up where you left off tomorrow.
 
 ## 1. Brainstorm (20 features)

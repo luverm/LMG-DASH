@@ -12,7 +12,10 @@ export interface GitHubStoreOptions {
 
 export interface GitHubIdentity {
   login: string
-  /** Token expiry reported by GitHub for fine-grained tokens, ISO string. */
+  /**
+   * Token expiry reported by GitHub for fine-grained tokens, ISO string. Browsers may not be
+   * allowed to read this header (CORS), so it can be missing even when the token expires.
+   */
   tokenExpiresAt?: string
 }
 
@@ -20,7 +23,6 @@ function headers(token: string): HeadersInit {
   return {
     Authorization: `Bearer ${token}`,
     Accept: 'application/vnd.github+json',
-    'X-GitHub-Api-Version': '2022-11-28',
   }
 }
 
