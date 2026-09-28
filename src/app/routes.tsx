@@ -1,6 +1,8 @@
 import type { RouteObject } from 'react-router'
 import { AppLayout } from '@/components/layout/AppLayout'
-import { OverviewPage } from '@/features/overview/OverviewPage'
+import { HistoryPage } from '@/features/history/HistoryPage'
+import { ProjectsPage } from '@/features/projects/ProjectsPage'
+import { TodayPage } from '@/features/today/TodayPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 
 export const routes: RouteObject[] = [
@@ -8,7 +10,9 @@ export const routes: RouteObject[] = [
     path: '/',
     element: <AppLayout />,
     children: [
-      { index: true, element: <OverviewPage /> },
+      { index: true, element: <TodayPage /> },
+      { path: 'projects', element: <ProjectsPage /> },
+      { path: 'history', element: <HistoryPage /> },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

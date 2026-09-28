@@ -1,18 +1,17 @@
+import type { ReactNode } from 'react'
 import { Outlet } from 'react-router'
-import { Header } from './Header'
-import { Sidebar } from './Sidebar'
+import { ShapeBackdrop } from '@/components/shapes/ShapeBackdrop'
+import { TopBar } from './TopBar'
 import styles from './AppLayout.module.css'
 
-export function AppLayout() {
+export function AppLayout({ topBarRight }: { topBarRight?: ReactNode }) {
   return (
     <div className={styles.shell}>
-      <Sidebar />
-      <div className={styles.main}>
-        <Header />
-        <main className={styles.content}>
-          <Outlet />
-        </main>
-      </div>
+      <ShapeBackdrop />
+      <TopBar right={topBarRight} />
+      <main className={styles.content}>
+        <Outlet />
+      </main>
     </div>
   )
 }

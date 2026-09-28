@@ -1,22 +1,18 @@
 .shell {
-  display: grid;
-  grid-template-columns: 220px 1fr;
+  position: relative;
   min-height: 100vh;
 }
 
-.main {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
 .content {
-  flex: 1;
-  padding: var(--space-6);
+  position: relative;
+  z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-8);
 }
 
-@media (max-width: 768px) {
-  .shell {
-    grid-template-columns: 1fr;
+@media (max-width: 720px) {
+  .content {
+    padding: var(--space-5) var(--space-4);
   }
 }

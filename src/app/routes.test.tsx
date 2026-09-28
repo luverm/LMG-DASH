@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { routes } from '@/app/routes'
+import { routes } from './routes'
 
 function renderAt(path: string) {
   const router = createMemoryRouter(routes, { initialEntries: [path] })
@@ -8,9 +8,11 @@ function renderAt(path: string) {
 }
 
 describe('routing', () => {
-  it('renders the overview page at /', () => {
+  it('shows the top bar tabs', () => {
     renderAt('/')
-    expect(screen.getByRole('heading', { name: 'Overview' })).toBeInTheDocument()
+    for (const name of ['Today', 'Projects', 'History']) {
+      expect(screen.getByRole('link', { name })).toBeInTheDocument()
+    }
   })
 
   it('renders the not-found page for unknown paths', () => {
