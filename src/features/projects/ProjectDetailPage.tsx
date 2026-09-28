@@ -70,6 +70,7 @@ export function ProjectDetailPage() {
         <EditableText
           label="Title"
           hideLabel
+          wrap
           value={p.title}
           className={styles.titleInput}
           onSave={(title) => title.trim() && set({ title: title.trim() })}
@@ -90,6 +91,36 @@ export function ProjectDetailPage() {
         ))}
       </div>
 
+      <div className={styles.actions}>
+        <ShapeButton
+          shape="hexagon"
+          disabled={inPlan || today.status === 'closed'}
+          onClick={() => {
+            updateDay((d) => addPlanItem(d, { title: p.title, projectId: p.id }))
+            toast("Added to today's plan")
+          }}
+        >
+          {inPlan ? "In today's plan" : "Add to today's plan"}
+        </ShapeButton>
+        <ClaudeButton prompt={() => brainstormPrompt(p)}>Brainstorm with Claude</ClaudeButton>
+        <ClaudeButton prompt={() => requesterUpdatePrompt(p)} shape="square">
+          Draft an update
+        </ClaudeButton>
+        <ShapeButton
+          shape="triangle"
+          variant="ghost"
+          size="sm"
+          color="var(--rose)"
+          onClick={() => {
+            if (confirm(`Delete "${p.title}"?`)) {
+              remove(p.id)
+              navigate('/projects')
+            }
+          }}
+        >
+          Delete
+        </ShapeButton>
+      </div>
       <div className={styles.detailGrid}>
         <div className={styles.column}>
           <Card title="The ask">
@@ -265,37 +296,6 @@ export function ProjectDetailPage() {
               </ul>
             )}
           </Card>
-
-          <div className={styles.actions}>
-            <ShapeButton
-              shape="hexagon"
-              disabled={inPlan || today.status === 'closed'}
-              onClick={() => {
-                updateDay((d) => addPlanItem(d, { title: p.title, projectId: p.id }))
-                toast("Added to today's plan")
-              }}
-            >
-              {inPlan ? "In today's plan" : "Add to today's plan"}
-            </ShapeButton>
-            <ClaudeButton prompt={() => brainstormPrompt(p)}>Brainstorm with Claude</ClaudeButton>
-            <ClaudeButton prompt={() => requesterUpdatePrompt(p)} shape="square">
-              Draft an update
-            </ClaudeButton>
-            <ShapeButton
-              shape="triangle"
-              variant="ghost"
-              size="sm"
-              color="var(--rose)"
-              onClick={() => {
-                if (confirm(`Delete "${p.title}"?`)) {
-                  remove(p.id)
-                  navigate('/projects')
-                }
-              }}
-            >
-              Delete
-            </ShapeButton>
-          </div>
         </div>
       </div>
     </div>

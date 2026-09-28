@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { Shape } from '@/components/shapes/Shape'
 import type { ShapeKind } from '@/components/shapes/shapes'
 import type { DayRecord } from '@/features/workday/types'
@@ -34,7 +35,7 @@ export function ClosingCelebration({ day, onDone }: { day: DayRecord; onDone(): 
   }
   let index = 0
 
-  return (
+  return createPortal(
     <div className={styles.overlay} aria-hidden>
       <div className={styles.pile}>
         {rows.map((row, r) => (
@@ -58,6 +59,7 @@ export function ClosingCelebration({ day, onDone }: { day: DayRecord; onDone(): 
         ))}
       </div>
       <p className={styles.caption}>Nice work today.</p>
-    </div>
+    </div>,
+    document.body,
   )
 }

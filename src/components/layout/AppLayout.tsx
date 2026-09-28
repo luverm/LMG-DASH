@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, Outlet } from 'react-router'
+import { useEffect, useState } from 'react'
+import { Link, Outlet, useLocation } from 'react-router'
 import { daysUntil } from '@/app/data/connection'
 import { useData } from '@/app/data/DataContext'
 import { ToastProvider } from '@/components/feedback/ToastProvider'
@@ -18,6 +18,8 @@ export function AppLayout() {
   const { mode, tokenExpiresAt } = useData()
   const [capturing, setCapturing] = useState(false)
   const expiresIn = daysUntil(tokenExpiresAt)
+  const { pathname } = useLocation()
+  useEffect(() => window.scrollTo?.(0, 0), [pathname])
 
   return (
     <ToastProvider>

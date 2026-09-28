@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { Shape } from '@/components/shapes/Shape'
 import type { ShapeKind } from '@/components/shapes/shapes'
 import styles from './Dialog.module.css'
@@ -32,7 +33,7 @@ export function Dialog({ title, shape, color, onClose, children, footer, wide }:
     }
   }, [onClose])
 
-  return (
+  return createPortal(
     <div
       className={styles.backdrop}
       onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}
@@ -56,6 +57,7 @@ export function Dialog({ title, shape, color, onClose, children, footer, wide }:
         <div className={styles.body}>{children}</div>
         {footer && <footer className={styles.footer}>{footer}</footer>}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

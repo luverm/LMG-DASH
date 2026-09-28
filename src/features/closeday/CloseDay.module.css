@@ -33,15 +33,15 @@
 }
 
 .review li {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-3);
-  flex-wrap: wrap;
 }
 
 .itemTitle {
   min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .segmented {
@@ -120,4 +120,33 @@
 .summary dd {
   margin: 0;
   white-space: pre-wrap;
+}
+
+@media (max-width: 600px) {
+  .review {
+    gap: var(--space-3);
+  }
+
+  .review li {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+
+  .segmented {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .segmented button {
+    min-height: 36px;
+  }
+
+  .moods {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .mood {
+    min-width: 0;
+  }
 }
