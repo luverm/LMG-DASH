@@ -1,6 +1,6 @@
 # Work dashboard plan
 
-A calm, playful work timer: plan the day, start a clock, take breaks, close the day with a short summary, and pick up where you left off tomorrow.
+A calm, playful work timer and project notebook: keep track of the solutions coworkers ask for, plan the day, start a clock, take breaks, close the day with a short summary, and pick up where you left off tomorrow.
 
 ## 1. Brainstorm (20 features)
 
@@ -25,28 +25,31 @@ A calm, playful work timer: plan the day, start a clock, take breaks, close the 
 19. **Scratchpad notes**: quick notes during the day that feed into the summary.
 20. **Live tab title**: shows the running time (e.g. "1:42 · Working").
 
-**Added later:** 21. **Day planning**: a short list of what you intend to do today, with rough time estimates, that you work through during the day.
+**Added later:** 21. **Day planning**: a short list of what you intend to do today, with rough time estimates, that you work through during the day. 22. **Projects & wishes**: a place to collect the problems coworkers bring you and the solutions you build for them, with or without AI.
 
 Other ideas that didn't make the list: streaks, sound effects, projects/categories, and calendar sync.
 
 ## 2. Narrowed to 10 (v1)
 
-| #   | Feature                                      | Shape    | Why it's in                                        |
-| --- | -------------------------------------------- | -------- | -------------------------------------------------- |
-| 1   | Work clock (start / pause / resume)          | Circle   | The core of the app                                |
-| 2   | Breaks with type                             | Triangle | Explicitly requested                               |
-| 3   | Current focus label                          | Hexagon  | Makes the summary meaningful, at little cost       |
-| 4   | Day timeline                                 | All      | Shows the whole day at a glance, calmly            |
-| 5   | Daily target progress ring                   | Circle   | Doubles as the clock face, so no extra clutter     |
-| 6   | Close workday + auto-drafted summary         | Square   | Explicitly requested; the auto-draft saves typing  |
-| 7   | Day planning (absorbs the resume card)       | Hexagon  | Gives the day a shape; unfinished items carry over |
-| 8   | Gentle break nudge                           | Triangle | Keeps the app healthy to use, not just a tracker   |
-| 9   | Local persistence + forgotten-timer recovery | –        | A timer that loses data or runs for 14h is useless |
-| 10  | History of past days                         | Square   | Somewhere for the summaries to live                |
+| #   | Feature                                      | Shape    | Why it's in                                              |
+| --- | -------------------------------------------- | -------- | -------------------------------------------------------- |
+| 1   | Work clock (start / pause / resume)          | Circle   | The core of the app                                      |
+| 2   | Breaks with type                             | Triangle | Explicitly requested                                     |
+| 3   | Current focus label                          | Hexagon  | Makes the summary meaningful, at little cost             |
+| 4   | Day timeline                                 | All      | Shows the whole day at a glance, calmly                  |
+| 5   | Daily target progress ring                   | Circle   | Doubles as the clock face, so no extra clutter           |
+| 6   | Close workday + auto-drafted summary         | Square   | Explicitly requested; the auto-draft saves typing        |
+| 7   | Day planning (absorbs the resume card)       | Hexagon  | Gives the day a shape; unfinished items carry over       |
+| 8   | Gentle break nudge                           | Triangle | Keeps the app healthy to use, not just a tracker         |
+| 9   | Local persistence + forgotten-timer recovery | –        | A timer that loses data or runs for 14h is useless       |
+| 10  | History of past days                         | Square   | Somewhere for the summaries to live                      |
+| 11  | Projects & wishes                            | Hexagon  | Where your actual work comes from; lives on its own page |
 
 **Parked for later:** Pomodoro presets, weekly stats, entry editing (beyond recovery), keyboard shortcuts, export, idle detection, scratchpad and live tab title. Shortcuts and the tab title are cheap and would be the first extras.
 
 The resume card from the first draft now lives at the top of the day plan: yesterday's unfinished items and "next up" become today's starting list. The list stays at 10 without losing the resume idea.
+
+Projects & wishes makes it 11. It gets its own page, so it adds no clutter to the Today screen.
 
 ## 3. Look and feel
 
@@ -62,6 +65,7 @@ The resume card from the first draft now lives at the top of the day plan: yeste
 | `--mint`           | `#A8E6CF` | Circle: work, clock, progress         |
 | `--peach`          | `#FFCBA4` | Triangle: breaks                      |
 | `--lavender`       | `#CDB4F6` | Hexagon: focus, current task          |
+| `--butter`         | `#F3E1A0` | Hexagon: projects and wishes          |
 | `--sky`            | `#A0D2EB` | Square: close day, summaries, history |
 | `--rose`           | `#F4A6B0` | Warnings and destructive actions only |
 
@@ -73,7 +77,7 @@ Each concept owns one shape, used for its icon, button outline and timeline mark
 
 - **Circle**: work and time. The clock itself is a large ring.
 - **Triangle**: breaks.
-- **Hexagon**: focus and tasks.
+- **Hexagon**: things you work on. Tasks and focus are lavender; projects are butter yellow. Hexagons tile into a honeycomb, which suits projects built from many tasks.
 - **Square**: the day as a whole (close, summary, history).
 
 A few very large, faint shapes (4–6% opacity) drift slowly behind the content. They are static when `prefers-reduced-motion` is set.
@@ -96,7 +100,7 @@ The Today screen has one primary action visible at a time, and the main button c
 
 ```
  ┌──────────────────────────────────────────────┐
- │  LMG Dash                 Today · History    │
+ │  LMG Dash                 Today · Projects · History    │
  ├──────────────────────────────────────────────┤
  │               ◯  3:12:45                     │
  │            (ring = target 8h)                │
@@ -115,7 +119,7 @@ The Today screen has one primary action visible at a time, and the main button c
  └──────────────────────────────────────────────┘
 ```
 
-The sidebar is replaced by a slim top bar with two tabs (Today and History) to keep it uncluttered.
+The sidebar is replaced by a slim top bar with three tabs (Today, Projects, History) and a small "+ Wish" quick-capture button to keep it uncluttered.
 
 ## 4. Behaviour
 
@@ -146,12 +150,40 @@ idle ──start──▶ working ◀──resume/end break──▶ on break
 - **Ticking off**: check an item to mark it done (the hexagon fills in with a small pop). If it was the running item, the clock keeps running with no focus and asks "What's next?" by highlighting the next open item.
 - **Mid-day changes**: items can be added, edited or reordered at any time without affecting tracked time.
 
+### Projects & wishes
+
+A single list of **projects**, where every project starts life as a **wish**: a problem a coworker brought to you. One entity with a status pipeline keeps it simple; there is no separate "request" and "project" to keep in sync.
+
+- **Quick capture**: the "+ Wish" button in the top bar opens a small dialog, available from any page. Only a title and "from whom" are needed; everything else can be filled in later. It's meant for the moment someone pings you with an idea.
+- **Status pipeline**:
+  - Main flow: Wish → Exploring → Building → Delivered.
+  - Side exits: Parked and Declined.
+  - Moving a project to Delivered fills its hexagon and plays a small honeycomb "click into place" animation.
+- **Fields on a project**:
+  - **Title**, **requested by** (one or more coworkers, with autocomplete from names used before), and **team/department**.
+  - **Problem** (what hurts today) and **wish** (what they'd like to happen).
+  - **Approach**: AI, automation/script, tool/app, process change, or undecided.
+  - **Impact** and **effort** on a simple 1–3 scale.
+  - **Links**, such as a repo, document or chat thread.
+  - **Notes log**: timestamped entries, newest first ("Talked to Anna, she also needs CSV export").
+- **Projects page**:
+  - A list grouped by status, with filters for status, person and approach, plus a search box.
+  - "Quick wins" sorting (high impact, low effort) to help pick the next thing.
+  - A board view with columns per status is a possible later addition.
+- **Project detail page** (`/projects/:id`): all fields, the notes log, and the time you've spent on it.
+- **Links to the rest of the app**:
+  - A plan item can belong to a project; pick it from a dropdown when adding the item.
+  - Time tracked on that plan item counts toward the project, so each project shows total hours and when you last worked on it.
+  - The close-day summary groups "Done today" by project.
+  - From a project you can "Add to today's plan" in one click.
+- **Privacy**: coworker names and their requests stay in this browser only (see the defaults below).
+
 ### Close workday flow
 
 1. The Close button opens a dialog showing the day's totals (work, breaks, per-focus breakdown) and the timeline.
 2. Fields are prefilled where possible:
    - **Plan review**: each open plan item gets a choice of Done, Carry over (the default) or Drop.
-   - **Done today**: prefilled with completed plan items and other focus labels with their durations, editable.
+   - **Done today**: prefilled with completed plan items and other focus labels with their durations, grouped by project, editable.
    - **Next up**: prefilled with the carried-over items, editable.
    - **Blockers**: optional.
    - **Mood**: pick one of four shapes.
@@ -170,6 +202,7 @@ interface Segment {
   breakType?: BreakType
   focus?: string
   planItemId?: string // set when started from a plan item
+  projectId?: string // copied from the plan item, so time per project is a simple sum
   start: string // ISO timestamp
   end?: string // open while running
 }
@@ -180,6 +213,28 @@ interface PlanItem {
   estimateMinutes?: number
   status: 'open' | 'done' | 'dropped'
   carriedFrom?: string // YYYY-MM-DD of the day it was carried over from
+  projectId?: string
+}
+
+type ProjectStatus = 'wish' | 'exploring' | 'building' | 'delivered' | 'parked' | 'declined'
+type Approach = 'ai' | 'automation' | 'tool' | 'process' | 'undecided'
+
+interface Project {
+  id: string
+  title: string
+  requestedBy: string[] // coworker names
+  team?: string
+  problem?: string
+  wish?: string
+  approach: Approach
+  impact?: 1 | 2 | 3
+  effort?: 1 | 2 | 3
+  status: ProjectStatus
+  links: { label: string; url: string }[]
+  notes: { id: string; at: string; text: string }[]
+  createdAt: string
+  updatedAt: string
+  deliveredAt?: string
 }
 
 interface DaySummary {
@@ -200,14 +255,14 @@ interface DayRecord {
 }
 ```
 
-- Storage key: `lmg-dash:v1:days` holds a record keyed by date, plus `lmg-dash:v1:settings`. Storage is versioned so it can migrate later.
+- Storage key: `lmg-dash:v1:days` holds a record keyed by date, plus `lmg-dash:v1:projects` (keyed by id) and `lmg-dash:v1:settings`. Storage is versioned so it can migrate later.
 - A small `workdayRepository` interface separates the UI from storage, so a backend can replace localStorage later (`src/lib/api.ts` already exists).
 
 ## 6. Code layout
 
 ```
 src/
-  app/                  routes: / (Today), /history
+  app/                  routes: / (Today), /projects, /projects/:id, /history
   components/
     shapes/             Shape.tsx (circle|triangle|hexagon|square SVG), ShapeBackdrop.tsx
     ui/                 ShapeButton.tsx (press animations), Dialog.tsx, Toast.tsx, Card.tsx
@@ -223,6 +278,13 @@ src/
     planning/
       plan.ts           pure helpers: add/reorder/complete, carry-over, planned vs spent
       components/       PlanYourDay (start-of-day panel), PlanList, PlanItemRow
+    projects/
+      projects.ts       pure helpers: filters, quick-wins sort, time per project
+      storage.ts        project repository (same pattern as workday)
+      ProjectsPage.tsx  grouped list + filters
+      ProjectDetailPage.tsx
+      components/       QuickCaptureDialog, ProjectRow, StatusPicker, NotesLog,
+                        PeopleInput (autocomplete), ApproachBadge
     history/
       HistoryPage.tsx   list of past days: totals, mini timeline, summary
   styles/               tokens.css (palette, motion), global.css
@@ -237,8 +299,9 @@ State management uses `useReducer` and context, with no extra dependencies. Anim
 3. **Today screen**: clock ring with target, controls, break menu, focus input and timeline.
 4. **Day planning**: plan helpers with tests, the "Plan your day" panel, the plan list on Today, and starting work from an item.
 5. **Close workday and carry-over**: the dialog with plan review, auto-draft, the stacking animation, and seeding the next day's plan.
-6. **History and nudge**: the history page and the break nudge toast.
-7. **Polish**: reduced motion, focus rings and ARIA labels, empty states, and a mobile layout pass.
+6. **Projects & wishes**: model and storage with tests, quick capture, the projects list, the detail page, then linking plan items and showing time per project.
+7. **History and nudge**: the history page and the break nudge toast.
+8. **Polish**: reduced motion, focus rings and ARIA labels, empty states, and a mobile layout pass.
 
 Each step is its own commit and keeps lint, typecheck, tests and build green.
 
@@ -246,6 +309,7 @@ Each step is its own commit and keeps lint, typecheck, tests and build green.
 
 - Daily target: **8h**, editable in a small settings popover.
 - Break nudge after **50 min** of continuous work.
-- Data stays **local to the browser** in v1, with no accounts or sync.
+- Data stays **local to the browser** in v1, with no accounts or sync. Because project notes are more valuable than timer data, v1 also gets a simple **Export / Import backup (JSON)** in settings, pulled forward from the parked "Export" idea.
 - Break types: **coffee, lunch, walk, other**.
+- Projects are **personal**: only you see them; coworkers don't submit wishes themselves (that would need a backend).
 - Planning is a **task list with time estimates**, not a clock-time schedule (e.g. "10:00–11:30"). Open items **carry over** by default.
