@@ -59,6 +59,7 @@ export function ControlBar({
       )}
       {state !== 'break' && (
         <Menu
+          title="Take a break"
           trigger={({ open, toggle }) => (
             <ShapeButton
               shape="triangle"

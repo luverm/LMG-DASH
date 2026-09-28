@@ -54,8 +54,22 @@ describe('verifyGitHubAccess', () => {
         }),
       )
       .mockResolvedValueOnce(json({ private: true, permissions: { push: true } }))
+      .mockResolvedValueOnce(json({ message: 'This repository is empty.' }, 404))
     const result = await verifyGitHubAccess({ token: 't', owner: 'luverm', repo: 'd', fetch })
     expect(result).toMatchObject({ login: 'luverm', canWrite: true, isPrivate: true })
     expect(result.tokenExpiresAt).toMatch(/^2027-09-28/)
+  })
+
+  it('explains a token without the Contents permission', async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce(json({ login: 'luverm' }))
+      .mockResolvedValueOnce(json({ private: true, permissions: { push: true } }))
+      .mockResolvedValueOnce(
+        json({ message: 'Resource not accessible by personal access token' }, 403),
+      )
+    await expect(
+      verifyGitHubAccess({ token: 't', owner: 'luverm', repo: 'd', fetch }),
+    ).rejects.toThrow(/Contents to "Read and write"/)
   })
 })

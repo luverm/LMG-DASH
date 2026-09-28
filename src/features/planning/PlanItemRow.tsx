@@ -143,6 +143,7 @@ export function PlanItemRow({
 
       <Menu
         align="right"
+        title={item.title}
         trigger={({ toggle }) => (
           <button className={styles.more} onClick={toggle} aria-label={`More for "${item.title}"`}>
             ⋯

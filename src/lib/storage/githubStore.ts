@@ -30,6 +30,9 @@ function encodePath(path: string) {
   return path.split('/').map(encodeURIComponent).join('/')
 }
 
+export const MISSING_CONTENTS_PERMISSION =
+  'The token can\'t read or write files in this repository. On GitHub, edit the token and set Repository permissions → Contents to "Read and write".'
+
 async function failure(res: Response, what: string): Promise<never> {
   if (res.status === 401) throw new AuthError()
   let detail = ''
@@ -37,6 +40,10 @@ async function failure(res: Response, what: string): Promise<never> {
     detail = ((await res.json()) as { message?: string }).message ?? ''
   } catch {
     // body wasn't JSON
+  }
+  // Fine-grained tokens without the Contents permission get this 403.
+  if (res.status === 403 && /not accessible by personal access token/i.test(detail)) {
+    throw new Error(MISSING_CONTENTS_PERMISSION)
   }
   throw new Error(`${what} failed: ${res.status} ${detail}`.trim())
 }
@@ -65,6 +72,17 @@ export async function verifyGitHubAccess(
     private: boolean
     permissions?: { push?: boolean }
   }
+
+  // The repo's `permissions` reflect the account, not the token, so probe file access directly.
+  // An empty repository answers 404, which is fine.
+  const contentsRes = await f(`${API}/repos/${opts.owner}/${opts.repo}/contents/`, {
+    headers: headers(opts.token),
+    cache: 'no-store',
+  })
+  if (!contentsRes.ok && contentsRes.status !== 404) {
+    await failure(contentsRes, 'Checking file access')
+  }
+
   return {
     login: user.login,
     tokenExpiresAt: expiry ? new Date(expiry).toISOString() : undefined,

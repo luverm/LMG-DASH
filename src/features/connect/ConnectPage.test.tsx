@@ -24,7 +24,10 @@ describe('ConnectPage', () => {
       vi
         .fn()
         .mockResolvedValueOnce(json({ login: 'luverm' }))
-        .mockResolvedValueOnce(json({ private: true, permissions: { push: true } })),
+        .mockResolvedValueOnce(json({ private: true, permissions: { push: true } }))
+        .mockResolvedValueOnce(
+          new Response('{"message":"This repository is empty."}', { status: 404 }),
+        ),
     )
     const onConnected = vi.fn()
     const user = userEvent.setup()
@@ -50,7 +53,8 @@ describe('ConnectPage', () => {
       vi
         .fn()
         .mockResolvedValueOnce(json({ login: 'luverm' }))
-        .mockResolvedValueOnce(json({ private: false, permissions: { push: true } })),
+        .mockResolvedValueOnce(json({ private: false, permissions: { push: true } }))
+        .mockResolvedValueOnce(new Response('{}', { status: 404 })),
     )
     const onConnected = vi.fn()
     const user = userEvent.setup()

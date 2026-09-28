@@ -176,12 +176,15 @@
 
 .detailHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-3);
 }
 
 .titleInput {
   flex: 1;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.25;
   min-width: 0;
   padding: var(--space-1) var(--space-2);
   border: 1px solid transparent;
@@ -415,6 +418,33 @@
 
   .detailGrid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .detailHeader svg {
+    margin-top: 6px;
+  }
+
+  .titleInput {
+    font-size: 1.3rem;
+  }
+
+  /* The status pipeline scrolls sideways instead of wrapping. */
+  .pipeline {
+    justify-self: stretch;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .pipeline button {
+    flex: none;
+    min-height: 36px;
+  }
+
+  .pageHeader h1 {
+    font-size: 1.35rem;
   }
 }
 
