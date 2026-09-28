@@ -3,6 +3,8 @@ import { Shape } from '@/components/shapes/Shape'
 import type { ShapeKind } from '@/components/shapes/shapes'
 import { Dialog } from '@/components/ui/Dialog'
 import { ShapeButton } from '@/components/ui/ShapeButton'
+import { ClaudeButton } from '@/features/claude/ClaudeButton'
+import { polishSummaryPrompt } from '@/features/claude/prompts'
 import { Timeline } from '@/features/today/components/Timeline'
 import { closeDay, totals } from '@/features/workday/day'
 import type { DayRecord, Mood, PlanDecision } from '@/features/workday/types'
@@ -78,6 +80,20 @@ export function CloseDayDialog({ day, onCancel, onClosed, projectName }: CloseDa
       onClose={onCancel}
       footer={
         <>
+          <ClaudeButton
+            shape="square"
+            prompt={() =>
+              polishSummaryPrompt(
+                day,
+                now,
+                { done: done ?? doneDraft, next: next ?? nextDraft, blockers },
+                projectName ?? (() => undefined),
+              )
+            }
+          >
+            Polish with Claude
+          </ClaudeButton>
+          <span style={{ flex: 1 }} />
           <ShapeButton shape="triangle" variant="ghost" onClick={onCancel}>
             Not yet
           </ShapeButton>

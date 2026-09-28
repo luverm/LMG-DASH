@@ -1,6 +1,8 @@
 import { Card } from '@/components/ui/Card'
 import { Shape } from '@/components/shapes/Shape'
 import { ShapeButton } from '@/components/ui/ShapeButton'
+import { ClaudeButton } from '@/features/claude/ClaudeButton'
+import { planDayPrompt } from '@/features/claude/prompts'
 import { addPlanItem, finishPlanning, startWork } from '@/features/workday/day'
 import type { DayRecord } from '@/features/workday/types'
 import { useWorkday } from '@/features/workday/WorkdayContext'
@@ -77,6 +79,13 @@ export function PlanYourDay({ day, previous, now, projectName }: PlanYourDayProp
         actions={<PlannedTotal day={day} />}
       >
         <PlanList day={day} now={now} mode="planning" projectName={projectName} />
+        {day.plan.length > 1 && (
+          <div className={styles.claude}>
+            <ClaudeButton prompt={() => planDayPrompt(day, now, projectName ?? (() => undefined))}>
+              Help me plan with Claude
+            </ClaudeButton>
+          </div>
+        )}
       </Card>
 
       <div className={styles.actions}>

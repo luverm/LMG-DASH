@@ -54,3 +54,9 @@
 .note {
   font-weight: 450;
 }
+
+.claude {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-3);
+}

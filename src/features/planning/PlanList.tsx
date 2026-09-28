@@ -10,6 +10,8 @@ import {
   updatePlanItem,
 } from '@/features/workday/day'
 import type { DayRecord } from '@/features/workday/types'
+import { useProjects } from '@/features/projects/ProjectsContext'
+import { activeStatuses } from '@/features/projects/types'
 import { useWorkday } from '@/features/workday/WorkdayContext'
 import { formatMinutes } from '@/lib/time'
 import { estimateOptions } from './estimates'
@@ -27,6 +29,11 @@ export function PlanList({ day, now, mode, projectName = () => undefined }: Plan
   const { update } = useWorkday()
   const [title, setTitle] = useState('')
   const [estimate, setEstimate] = useState<number | undefined>()
+  const [projectId, setProjectId] = useState('')
+  const { projects } = useProjects()
+  const projectOptions = projects
+    .filter((p) => activeStatuses.includes(p.status))
+    .sort((a, b) => a.title.localeCompare(b.title))
   const [dragId, setDragId] = useState<string | null>(null)
 
   const items = day.plan.filter((i) => i.status !== 'dropped')
@@ -34,9 +41,12 @@ export function PlanList({ day, now, mode, projectName = () => undefined }: Plan
   function add(e: FormEvent) {
     e.preventDefault()
     if (!title.trim()) return
-    update((d) => addPlanItem(d, { title, estimateMinutes: estimate }))
+    update((d) =>
+      addPlanItem(d, { title, estimateMinutes: estimate, projectId: projectId || undefined }),
+    )
     setTitle('')
     setEstimate(undefined)
+    setProjectId('')
   }
 
   return (
@@ -61,6 +71,8 @@ export function PlanList({ day, now, mode, projectName = () => undefined }: Plan
                 )
               }
               onRemove={() => update((d) => removePlanItem(d, item.id))}
+              projectOptions={projectOptions}
+              onProject={(id) => update((d) => updatePlanItem(d, item.id, { projectId: id }))}
               dragging={dragId === item.id}
               readOnly={day.status === 'closed'}
               dragHandlers={{
@@ -88,7 +100,10 @@ export function PlanList({ day, now, mode, projectName = () => undefined }: Plan
           ))}
         </ul>
       )}
-      <form className={styles.add} onSubmit={add}>
+      <form
+        className={`${styles.add} ${projectOptions.length ? styles.addWithProject : ''}`}
+        onSubmit={add}
+      >
         <input
           className="input"
           value={title}
@@ -109,6 +124,21 @@ export function PlanList({ day, now, mode, projectName = () => undefined }: Plan
             </option>
           ))}
         </select>
+        {projectOptions.length > 0 && (
+          <select
+            className={`input ${styles.estimateSelect}`}
+            value={projectId}
+            onChange={(e) => setProjectId(e.target.value)}
+            aria-label="Project"
+          >
+            <option value="">No project</option>
+            {projectOptions.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.title}
+              </option>
+            ))}
+          </select>
+        )}
         <ShapeButton shape="hexagon" type="submit" disabled={!title.trim()}>
           Add
         </ShapeButton>

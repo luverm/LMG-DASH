@@ -2,6 +2,7 @@ import { useState, type DragEvent } from 'react'
 import { Shape } from '@/components/shapes/Shape'
 import { Menu, MenuItem } from '@/components/ui/Menu'
 import { ShapeButton } from '@/components/ui/ShapeButton'
+import type { Project } from '@/features/projects/types'
 import type { PlanItem } from '@/features/workday/types'
 import { formatDuration, formatMinutes } from '@/lib/time'
 import { estimateOptions } from './estimates'
@@ -19,6 +20,8 @@ export interface PlanItemRowProps {
   onEstimate(minutes: number | undefined): void
   onMove(delta: number): void
   onRemove(): void
+  projectOptions: Project[]
+  onProject(id: string | undefined): void
   dragHandlers: {
     onDragStart(e: DragEvent): void
     onDragOver(e: DragEvent): void
@@ -42,6 +45,8 @@ export function PlanItemRow({
   onEstimate,
   onMove,
   onRemove,
+  projectOptions,
+  onProject,
   dragHandlers,
   dragging,
   readOnly,
@@ -162,6 +167,26 @@ export function PlanItemRow({
                 </button>
               ))}
             </div>
+            {projectOptions.length > 0 && (
+              <label className={styles.menuProject}>
+                <span className={styles.menuLabel}>Project</span>
+                <select
+                  className="input"
+                  value={item.projectId ?? ''}
+                  onChange={(e) => {
+                    onProject(e.target.value || undefined)
+                    close()
+                  }}
+                >
+                  <option value="">No project</option>
+                  {projectOptions.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             <MenuItem onSelect={() => (close(), setEditing(true))}>Rename</MenuItem>
             <MenuItem onSelect={() => (close(), onMove(-1))}>Move up</MenuItem>
             <MenuItem onSelect={() => (close(), onMove(1))}>Move down</MenuItem>
