@@ -178,6 +178,17 @@ A single list of **projects**, where every project starts life as a **wish**: a 
   - From a project you can "Add to today's plan" in one click.
 - **Privacy**: coworker names and their requests stay in this browser only (see the defaults below).
 
+### Working with Claude (on your subscription)
+
+The app never calls the Claude API itself, because that is billed per token, separately from a Claude Pro/Max subscription. Instead, the app prepares context and you use Claude where your subscription already works: claude.ai, Claude Desktop or Claude Code.
+
+- **v1, "Copy for Claude" buttons**: one click copies a ready-made prompt with context to the clipboard, then opens claude.ai in a new tab so you can paste it. No keys, no backend, no cost. Planned buttons:
+  - On a project: "Brainstorm solutions", with the problem, wish, notes and whether AI is an option.
+  - On a project: "Draft an update for the requester".
+  - In close workday: "Polish my summary", using the day's totals, done items and next up.
+  - In planning: "Help me plan", with open items, estimates and the day's target.
+- **Later, a local MCP server** (optional): a small program on your computer that lets Claude Desktop or Claude Code read and update your projects, plans and summaries directly ("What did Anna ask for last month?"). This needs the data stored in a file on disk instead of only in the browser, so it would come together with a small local server. It is a separate step, to be decided later.
+
 ### Close workday flow
 
 1. The Close button opens a dialog showing the day's totals (work, breaks, per-focus breakdown) and the timeline.
