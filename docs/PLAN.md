@@ -31,19 +31,19 @@ Other ideas that didn't make the list: streaks, sound effects, projects/categori
 
 ## 2. Narrowed to 10 (v1)
 
-| #   | Feature                                      | Shape    | Why it's in                                              |
-| --- | -------------------------------------------- | -------- | -------------------------------------------------------- |
-| 1   | Work clock (start / pause / resume)          | Circle   | The core of the app                                      |
-| 2   | Breaks with type                             | Triangle | Explicitly requested                                     |
-| 3   | Current focus label                          | Hexagon  | Makes the summary meaningful, at little cost             |
-| 4   | Day timeline                                 | All      | Shows the whole day at a glance, calmly                  |
-| 5   | Daily target progress ring                   | Circle   | Doubles as the clock face, so no extra clutter           |
-| 6   | Close workday + auto-drafted summary         | Square   | Explicitly requested; the auto-draft saves typing        |
-| 7   | Day planning (absorbs the resume card)       | Hexagon  | Gives the day a shape; unfinished items carry over       |
-| 8   | Gentle break nudge                           | Triangle | Keeps the app healthy to use, not just a tracker         |
-| 9   | Local persistence + forgotten-timer recovery | –        | A timer that loses data or runs for 14h is useless       |
-| 10  | History of past days                         | Square   | Somewhere for the summaries to live                      |
-| 11  | Projects & wishes                            | Hexagon  | Where your actual work comes from; lives on its own page |
+| #   | Feature                                    | Shape    | Why it's in                                              |
+| --- | ------------------------------------------ | -------- | -------------------------------------------------------- |
+| 1   | Work clock (start / pause / resume)        | Circle   | The core of the app                                      |
+| 2   | Breaks with type                           | Triangle | Explicitly requested                                     |
+| 3   | Current focus label                        | Hexagon  | Makes the summary meaningful, at little cost             |
+| 4   | Day timeline                               | All      | Shows the whole day at a glance, calmly                  |
+| 5   | Daily target progress ring                 | Circle   | Doubles as the clock face, so no extra clutter           |
+| 6   | Close workday + auto-drafted summary       | Square   | Explicitly requested; the auto-draft saves typing        |
+| 7   | Day planning (absorbs the resume card)     | Hexagon  | Gives the day a shape; unfinished items carry over       |
+| 8   | Gentle break nudge                         | Triangle | Keeps the app healthy to use, not just a tracker         |
+| 9   | Saved to GitHub + forgotten-timer recovery | –        | A timer that loses data or runs for 14h is useless       |
+| 10  | History of past days                       | Square   | Somewhere for the summaries to live                      |
+| 11  | Projects & wishes                          | Hexagon  | Where your actual work comes from; lives on its own page |
 
 **Parked for later:** Pomodoro presets, weekly stats, entry editing (beyond recovery), keyboard shortcuts, export, idle detection, scratchpad and live tab title. Shortcuts and the tab title are cheap and would be the first extras.
 
@@ -176,7 +176,7 @@ A single list of **projects**, where every project starts life as a **wish**: a 
   - Time tracked on that plan item counts toward the project, so each project shows total hours and when you last worked on it.
   - The close-day summary groups "Done today" by project.
   - From a project you can "Add to today's plan" in one click.
-- **Privacy**: coworker names and their requests stay in this browser only (see the defaults below).
+- **Privacy**: coworker names and their requests are stored only in your private data repo on GitHub (see Hosting & storage).
 
 ### Working with Claude (on your subscription)
 
@@ -187,7 +187,7 @@ The app never calls the Claude API itself, because that is billed per token, sep
   - On a project: "Draft an update for the requester".
   - In close workday: "Polish my summary", using the day's totals, done items and next up.
   - In planning: "Help me plan", with open items, estimates and the day's target.
-- **Later, a local MCP server** (optional): a small program on your computer that lets Claude Desktop or Claude Code read and update your projects, plans and summaries directly ("What did Anna ask for last month?"). This needs the data stored in a file on disk instead of only in the browser, so it would come together with a small local server. It is a separate step, to be decided later.
+- **Claude reading your data directly**: because the data lives in a private GitHub repo (see Hosting & storage), Claude can already read it through the GitHub connector in claude.ai or Claude Code, on your subscription ("What did Anna ask for last month?" or "Summarise my week"). No extra server is needed. A dedicated MCP server with write access stays a possible later step.
 
 ### Close workday flow
 
@@ -201,7 +201,39 @@ The app never calls the Claude API itself, because that is billed per token, sep
 3. Save closes any open block, marks the day closed, plays the stacking animation and stores the summary.
 4. On the next day, carried-over items and "next up" seed the "Plan your day" panel.
 
-## 5. Data model (localStorage, v1)
+## 5. Hosting & storage (GitHub, private)
+
+The app is hosted entirely on GitHub, with no other services and no server to run:
+
+```
+ luverm/lmg-dash (this repo, private)          luverm/lmg-dash-data (private)
+   app code ──GitHub Actions──▶ GitHub Pages     days/2026-09-28.json
+                                   │             projects.json
+                          browser  │             settings.json
+                         loads app ▼                  ▲
+                         ┌──────────────┐   GitHub    │
+                         │   LMG Dash   │── API ──────┘
+                         │ (static SPA) │   read/write with your token
+                         └──────────────┘
+```
+
+- **App**: a static build deployed to GitHub Pages by a GitHub Actions workflow on every push to `main`.
+- **Data**: JSON files in a **separate private repo** (`lmg-dash-data`), read and written through the GitHub API. The site holds no data itself; it's an empty shell until you connect it.
+- **Connecting**: the first time, the app asks for a **fine-grained personal access token** scoped to _only_ `lmg-dash-data` with "Contents: read and write". The token is kept in that browser's local storage. Connecting on another device repeats this step.
+- **Why a separate data repo**: the token can't touch the app code, and the data has its own clean history.
+- **Saving**:
+  - Changes are applied to the screen instantly and cached locally, then committed to GitHub a few seconds after the last change and immediately on key moments (close workday, new wish). One commit per save batch, e.g. "Update 2026-09-28".
+  - A small indicator shows saved / saving / offline. Offline changes are queued and pushed when back online.
+- **Two devices at once**: every write sends the file's last-known version (`sha`). If GitHub rejects it because the file changed elsewhere, the app re-reads it and merges: segments and notes are appended by id, and other fields use last write wins. Collisions are unlikely because one day file is normally edited from one place.
+- **Backup**: git history is the backup; every past state can be restored. The planned JSON export moves back to "later".
+- **Team later**: the files are per user (`users/<github-login>/...`), so coworkers could later get their own folder in a shared data repo, or their own repo, without changing the format.
+- **Routing on Pages**: Vite `base` is set to the repo path, and a `404.html` copy of `index.html` makes deep links like `/projects/123` work.
+
+### Visibility caveat
+
+On a personal GitHub account, **a Pages site built from a private repo is still publicly reachable**. Access-controlled Pages exists only for organisations on GitHub Enterprise Cloud. Deploying Pages from a private repo also requires GitHub Pro. This is acceptable here because the published site is only the app shell: without your token it shows the connect screen and no data. All real content stays in the private data repo.
+
+## 6. Data model (v1)
 
 ```ts
 type SegmentKind = 'work' | 'break'
@@ -266,10 +298,11 @@ interface DayRecord {
 }
 ```
 
-- Storage key: `lmg-dash:v1:days` holds a record keyed by date, plus `lmg-dash:v1:projects` (keyed by id) and `lmg-dash:v1:settings`. Storage is versioned so it can migrate later.
-- A small `workdayRepository` interface separates the UI from storage, so a backend can replace localStorage later (`src/lib/api.ts` already exists).
+- Files in the data repo: `users/<login>/days/YYYY-MM-DD.json` (one `DayRecord` per day), `users/<login>/projects.json` (keyed by id) and `users/<login>/settings.json`. Each file carries `"version": 1` so it can migrate later.
+- A local cache in browser storage (`lmg-dash:v1:*`) makes the app start instantly and work offline; GitHub is the source of truth.
+- A small `workdayRepository` interface separates the UI from storage, so the GitHub storage can be swapped or mocked in tests.
 
-## 6. Code layout
+## 7. Code layout
 
 ```
 src/
@@ -281,7 +314,7 @@ src/
   features/
     workday/
       model.ts          types, reducer, pure selectors (totals, per-focus, current state)
-      storage.ts        localStorage repository + versioning
+      storage.ts        day repository on top of lib/sync + versioning
       WorkdayProvider.tsx context + 1s tick
       TodayPage.tsx
       components/       ClockRing, ControlBar, BreakMenu, FocusInput, Timeline,
@@ -298,29 +331,33 @@ src/
                         PeopleInput (autocomplete), ApproachBadge
     history/
       HistoryPage.tsx   list of past days: totals, mini timeline, summary
+  lib/
+    github/             GitHub contents API client, token handling, sha-based merge
+    sync/               save queue, debounce, offline queue, SaveIndicator state
   styles/               tokens.css (palette, motion), global.css
 ```
 
 State management uses `useReducer` and context, with no extra dependencies. Animations use plain CSS (keyframes, transitions and a spring-like `cubic-bezier`), with no animation library.
 
-## 7. Build order
+## 8. Build order
 
 1. **Theme and shapes**: tokens, `Shape`, `ShapeButton` with press animations, the drifting backdrop, and the top bar.
-2. **Workday model**: types, reducer, selectors and storage, with unit tests for timing, state transitions, focus splits and overnight recovery.
-3. **Today screen**: clock ring with target, controls, break menu, focus input and timeline.
-4. **Day planning**: plan helpers with tests, the "Plan your day" panel, the plan list on Today, and starting work from an item.
-5. **Close workday and carry-over**: the dialog with plan review, auto-draft, the stacking animation, and seeding the next day's plan.
-6. **Projects & wishes**: model and storage with tests, quick capture, the projects list, the detail page, then linking plan items and showing time per project.
-7. **History and nudge**: the history page and the break nudge toast.
-8. **Polish**: reduced motion, focus rings and ARIA labels, empty states, and a mobile layout pass.
+2. **Hosting & storage**: the Pages deploy workflow, the connect-with-token screen, the GitHub client and the save queue with the saved/saving/offline indicator. Tested against a mocked GitHub API, including the sha-conflict merge.
+3. **Workday model**: types, reducer, selectors and repositories, with unit tests for timing, state transitions, focus splits and overnight recovery.
+4. **Today screen**: clock ring with target, controls, break menu, focus input and timeline.
+5. **Day planning**: plan helpers with tests, the "Plan your day" panel, the plan list on Today, and starting work from an item.
+6. **Close workday and carry-over**: the dialog with plan review, auto-draft, the stacking animation, and seeding the next day's plan.
+7. **Projects & wishes**: model and storage with tests, quick capture, the projects list, the detail page, then linking plan items and showing time per project.
+8. **History and nudge**: the history page and the break nudge toast.
+9. **Polish**: reduced motion, focus rings and ARIA labels, empty states, and a mobile layout pass.
 
 Each step is its own commit and keeps lint, typecheck, tests and build green.
 
-## 8. Defaults to confirm
+## 9. Defaults to confirm
 
 - Daily target: **8h**, editable in a small settings popover.
 - Break nudge after **50 min** of continuous work.
-- Data stays **local to the browser** in v1, with no accounts or sync. Because project notes are more valuable than timer data, v1 also gets a simple **Export / Import backup (JSON)** in settings, pulled forward from the parked "Export" idea.
+- Hosted on **GitHub Pages**, with data in a separate **private repo `luverm/lmg-dash-data`**, accessed with a fine-grained token. Single user for now, with per-user folders so a team can be added later.
 - Break types: **coffee, lunch, walk, other**.
-- Projects are **personal**: only you see them; coworkers don't submit wishes themselves (that would need a backend).
+- Projects are **personal**: only you see them; coworkers don't submit wishes themselves.
 - Planning is a **task list with time estimates**, not a clock-time schedule (e.g. "10:00–11:30"). Open items **carry over** by default.
