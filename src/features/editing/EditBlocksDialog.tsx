@@ -8,8 +8,15 @@ import {
   type DayRecord,
   type Segment,
 } from '@/features/workday/types'
-import { atTime, createId, formatDayLabel, formatDuration, formatTimeOfDay } from '@/lib/time'
-import { toDraft, validateDrafts, type Draft } from './drafts'
+import {
+  atTime,
+  createId,
+  dateKey,
+  formatDayLabel,
+  formatDuration,
+  formatTimeOfDay,
+} from '@/lib/time'
+import { suggestNewBlock, toDraft, validateDrafts, type Draft } from './drafts'
 import styles from './EditBlocks.module.css'
 
 interface EditBlocksDialogProps {
@@ -24,40 +31,23 @@ export function EditBlocksDialog({ day, onSave, onClose }: EditBlocksDialogProps
     [...day.segments].sort((a, b) => a.start.localeCompare(b.start)).map(toDraft),
   )
   const [openedAt] = useState(() => Date.now())
+  const [added, setAdded] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const errors = validateDrafts(day.date, drafts)
   const set = (id: string, patch: Partial<Draft>) =>
     setDrafts((ds) => ds.map((d) => (d.id === id ? { ...d, ...patch } : d)))
 
   function addBlock() {
-    const toMinutes = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3))
-    const hhmm = (m: number) =>
-      `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
-    const sorted = [...drafts].sort((a, b) => a.start.localeCompare(b.start))
-    const last = sorted.at(-1)
-    let start: number
-    let end: number
-    if (last?.running) {
-      // Most often a forgotten earlier block: fill the hour before the running one.
-      const before = sorted.at(-2)
-      end = toMinutes(last.start)
-      start = Math.max(end - 60, before?.end ? toMinutes(before.end) : 0)
-    } else {
-      // Otherwise an hour after the last block, kept within the day.
-      const from = last ? toMinutes(last.end || last.start) : 9 * 60
-      end = Math.min(from + 60, 23 * 60 + 59)
-      start = Math.min(from, end - 30)
+    const isToday = day.date === dateKey(new Date(openedAt))
+    const slot = suggestNewBlock(drafts, isToday ? formatTimeOfDay(new Date(openedAt)) : '23:59')
+    if (!slot) {
+      setNotice("There's no free time left to add a block. Shorten or delete one first.")
+      return
     }
-    setDrafts((ds) => [
-      ...ds,
-      {
-        id: createId(),
-        kind: 'work',
-        focus: '',
-        start: hhmm(start),
-        end: hhmm(end),
-        running: false,
-      },
-    ])
+    const id = createId()
+    setNotice(null)
+    setAdded(id)
+    setDrafts((ds) => [...ds, { id, kind: 'work', focus: '', ...slot, running: false }])
   }
 
   function save() {
@@ -100,6 +90,11 @@ export function EditBlocksDialog({ day, onSave, onClose }: EditBlocksDialogProps
       }
     >
       {drafts.length === 0 && <p className={styles.empty}>No blocks yet. Add one below.</p>}
+      {notice && (
+        <p className={styles.notice} role="status">
+          {notice}
+        </p>
+      )}
       <ul className={styles.list}>
         {[...drafts]
           .sort((a, b) => a.start.localeCompare(b.start))
@@ -110,50 +105,84 @@ export function EditBlocksDialog({ day, onSave, onClose }: EditBlocksDialogProps
                   atTime(day.date, d.start).getTime()
                 : 0
             return (
-              <li key={d.id} className={`${styles.block} ${styles[d.kind]}`}>
-                <div className={styles.kind} role="radiogroup" aria-label="Type">
-                  {(['work', 'break'] as const).map((k) => (
-                    <button
-                      key={k}
-                      role="radio"
-                      aria-checked={d.kind === k}
-                      className={d.kind === k ? styles.kindActive : undefined}
-                      onClick={() => set(d.id, { kind: k })}
-                    >
-                      {k === 'work' ? 'Work' : 'Break'}
-                    </button>
-                  ))}
+              <li
+                key={d.id}
+                ref={(el) => {
+                  if (el && d.id === added)
+                    el.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' })
+                }}
+                className={[
+                  styles.block,
+                  styles[d.kind],
+                  d.id === added && styles.added,
+                  errors[d.id] && styles.invalid,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                <div className={styles.top}>
+                  <div className={styles.kind} role="radiogroup" aria-label="Type">
+                    {(['work', 'break'] as const).map((k) => (
+                      <button
+                        key={k}
+                        role="radio"
+                        aria-checked={d.kind === k}
+                        className={d.kind === k ? styles.kindActive : undefined}
+                        onClick={() => set(d.id, { kind: k })}
+                      >
+                        {k === 'work' ? 'Work' : 'Break'}
+                      </button>
+                    ))}
+                  </div>
+                  <span className={styles.duration}>
+                    {d.running ? 'running' : ms > 0 ? formatDuration(ms) : ''}
+                  </span>
+                  <button
+                    className={styles.delete}
+                    aria-label="Delete block"
+                    onClick={() => setDrafts((ds) => ds.filter((x) => x.id !== d.id))}
+                  >
+                    ×
+                  </button>
                 </div>
-                <label className={styles.time}>
-                  <span>From</span>
-                  <input
-                    className="input"
-                    type="time"
-                    value={d.start}
-                    onChange={(e) => set(d.id, { start: e.target.value })}
-                  />
-                </label>
-                <label className={styles.time}>
-                  <span>To</span>
-                  {d.running ? (
-                    <button
-                      className={styles.running}
-                      onClick={() =>
-                        set(d.id, { running: false, end: formatTimeOfDay(new Date()) })
-                      }
-                      title="Stop this block"
-                    >
-                      running · stop
-                    </button>
-                  ) : (
+
+                <div className={styles.times}>
+                  <label className={styles.time}>
+                    <span>From</span>
                     <input
-                      className="input"
+                      className={`input ${styles.timeInput}`}
                       type="time"
-                      value={d.end}
-                      onChange={(e) => set(d.id, { end: e.target.value })}
+                      value={d.start}
+                      onChange={(e) => set(d.id, { start: e.target.value })}
                     />
-                  )}
-                </label>
+                  </label>
+                  <span className={styles.arrow} aria-hidden>
+                    →
+                  </span>
+                  <label className={styles.time}>
+                    <span>To</span>
+                    {d.running ? (
+                      <button
+                        className={styles.running}
+                        onClick={() =>
+                          set(d.id, { running: false, end: formatTimeOfDay(new Date()) })
+                        }
+                        title="Stop this block now"
+                      >
+                        <span className={styles.pulse} aria-hidden />
+                        Now · stop
+                      </button>
+                    ) : (
+                      <input
+                        className={`input ${styles.timeInput}`}
+                        type="time"
+                        value={d.end}
+                        onChange={(e) => set(d.id, { end: e.target.value })}
+                      />
+                    )}
+                  </label>
+                </div>
+
                 {d.kind === 'work' ? (
                   <input
                     className={`input ${styles.label}`}
@@ -179,14 +208,6 @@ export function EditBlocksDialog({ day, onSave, onClose }: EditBlocksDialogProps
                     )}
                   </select>
                 )}
-                <span className={styles.duration}>{ms > 0 ? formatDuration(ms) : ''}</span>
-                <button
-                  className={styles.delete}
-                  aria-label="Delete block"
-                  onClick={() => setDrafts((ds) => ds.filter((x) => x.id !== d.id))}
-                >
-                  ×
-                </button>
                 {errors[d.id] && <p className={styles.error}>{errors[d.id]}</p>}
               </li>
             )
