@@ -2,6 +2,7 @@ import { Outlet } from 'react-router'
 import { useData } from '@/app/data/DataContext'
 import { ShapeBackdrop } from '@/components/shapes/ShapeBackdrop'
 import { ShapeButton } from '@/components/ui/ShapeButton'
+import { WorkdayProvider } from '@/features/workday/WorkdayProvider'
 import { SaveIndicator } from './SaveIndicator'
 import { TopBar } from './TopBar'
 import styles from './AppLayout.module.css'
@@ -24,7 +25,9 @@ export function AppLayout() {
         }
       />
       <main className={styles.content}>
-        <Outlet />
+        <WorkdayProvider>
+          <Outlet />
+        </WorkdayProvider>
       </main>
     </div>
   )
