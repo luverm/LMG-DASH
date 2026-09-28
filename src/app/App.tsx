@@ -1,6 +1,11 @@
 import { RouterProvider } from 'react-router'
+import { DataProvider } from './data/DataProvider'
 import { router } from './router'
 
 export function App() {
-  return <RouterProvider router={router} />
+  return (
+    <DataProvider>
+      <RouterProvider router={router} />
+    </DataProvider>
+  )
 }
