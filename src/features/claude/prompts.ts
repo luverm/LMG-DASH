@@ -36,6 +36,15 @@ Please help me think it through:
 4. Recommend one to start with and why.`
 }
 
+/** A message asking the requester for feedback, or a friendly follow-up after a week. */
+export function feedbackPrompt(p: Project, daysWaiting: number): string {
+  const who = p.requestedBy[0] ?? 'the requester'
+  const followUp = daysWaiting >= 7
+  return `Draft a short, friendly ${followUp ? `follow-up message (I asked ${daysWaiting} days ago and haven't heard back)` : 'message'} to ${who} asking for feedback on what I built for them. Keep it under 100 words, plain language. Ask 2–3 concrete questions: does it solve the problem, is anything missing or unclear, and can I mark it as done.
+
+${projectContext(p)}`
+}
+
 export function requesterUpdatePrompt(p: Project): string {
   const who = p.requestedBy[0] ?? 'the requester'
   return `Draft a short, friendly status update for ${who} about the project below. Keep it under 120 words, plain language, no jargon, and end with a clear next step or question for them.

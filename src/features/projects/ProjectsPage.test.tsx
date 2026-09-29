@@ -20,6 +20,12 @@ describe('Projects', () => {
     await user.click(screen.getByRole('radio', { name: 'Exploring' }))
     expect(screen.getByRole('radio', { name: 'Exploring' })).toHaveAttribute('aria-checked', 'true')
 
+    // Awaiting feedback shows the phase and offers to ask for feedback.
+    await user.click(screen.getByRole('radio', { name: 'Awaiting feedback' }))
+    expect(screen.getByText('since today')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ask for feedback' })).toBeInTheDocument()
+    await user.click(screen.getByRole('radio', { name: 'Exploring' }))
+
     await user.type(screen.getByLabelText('New note'), 'Also needs CSV')
     await user.click(screen.getByRole('button', { name: 'Add note' }))
     expect(screen.getByText('Also needs CSV')).toBeInTheDocument()

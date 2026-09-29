@@ -20,7 +20,7 @@ The full plan is in [`docs/PLAN.md`](docs/PLAN.md).
 - **Break reminder:** a gentle nudge after 50 minutes of continuous work.
 - **Close workday:** decide done / carry over / drop for each open item. The summary is drafted for you, grouped by project. Add blockers and a mood.
 - **Forgotten clock:** if the clock ran past midnight, the app asks when you actually stopped.
-- **Projects & wishes:** note coworkers' wishes in seconds (the **Wish** button, from any page). Track the problem, wish, approach, impact/effort, links and notes. Time on plan items linked to a project adds up per project.
+- **Projects & wishes:** note coworkers' wishes in seconds (the **Wish** button, from any page). Each project moves through phases (Wish → Exploring → Building → Awaiting feedback → Delivered, or Parked/Declined), shown as a step track with how long it's been in the current phase. Projects waiting on feedback for a week are flagged, with a Claude button to draft the follow-up. Track the problem, wish, approach, impact/effort, links and notes. Time on plan items linked to a project adds up per project.
 - **Solutions:** document what you've built: summary, problem, how it works, how to use it, maintenance, tools, who uses it, time saved per week, links, and the requests it solves. "Document the solution" on a project starts the page for you; export one or all as Markdown.
 - **Claude, on your subscription:** "Copy for Claude" buttons copy a prompt with context and open claude.ai. The app itself never calls an AI API.
 - **History:** a weekly overview (hours per day against your target, time per project, done items) and past days with totals, timeline, summary and notes.

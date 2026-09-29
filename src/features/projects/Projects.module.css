@@ -462,3 +462,54 @@
     grid-template-columns: 1fr;
   }
 }
+
+.groupDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c);
+}
+
+.rowPhase {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.followUp {
+  color: var(--peach);
+  font-weight: 650;
+}
+
+.followBanner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--peach) 40%, var(--border));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--peach) 10%, transparent);
+  text-align: left;
+  cursor: pointer;
+}
+
+.followBanner span {
+  margin-left: auto;
+  color: var(--peach);
+  font-weight: 650;
+}
+
+@media (max-width: 520px) {
+  .row .rowPhase {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    grid-column: 2;
+    justify-items: start;
+  }
+
+  .row .rowPhase .rowDate {
+    display: inline;
+  }
+}

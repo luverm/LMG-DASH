@@ -16,6 +16,7 @@ export function createProject(input: {
     problem: input.problem?.trim() || undefined,
     approach: 'undecided',
     status: 'wish',
+    statusSince: at,
     links: [],
     notes: [],
     workDates: [],
@@ -27,6 +28,7 @@ export function createProject(input: {
 /** Applies a patch, stamping updatedAt and deliveredAt. */
 export function patchProject(p: Project, patch: Partial<Project>, now = new Date()): Project {
   const next = { ...p, ...patch, updatedAt: now.toISOString() }
+  if (patch.status && patch.status !== p.status) next.statusSince = now.toISOString()
   if (patch.status === 'delivered' && p.status !== 'delivered') next.deliveredAt = now.toISOString()
   if (patch.status && patch.status !== 'delivered') next.deliveredAt = undefined
   return next
@@ -135,3 +137,13 @@ export function mergeProjects(local: ProjectsFile, remote: ProjectsFile): Projec
   }
   return { version: 1, projects }
 }
+
+/** Whole days a project has been in its current status. */
+export function daysInStatus(p: Project, now = new Date()): number {
+  const since = p.statusSince ?? p.updatedAt ?? p.createdAt
+  return Math.max(0, Math.floor((now.getTime() - new Date(since).getTime()) / 86_400_000))
+}
+
+/** Waiting on feedback for a week or more: time to follow up. */
+export const needsFollowUp = (p: Project, now = new Date()) =>
+  p.status === 'feedback' && daysInStatus(p, now) >= 7
