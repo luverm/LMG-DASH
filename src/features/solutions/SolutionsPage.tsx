@@ -11,7 +11,8 @@ import {
   allTools,
   defaultSolutionFilter,
   filterSolutions,
-  totalSavedMinutes,
+  formatSaved,
+  totalSavedMinutesPerYear,
   type SolutionFilter,
 } from './solutions'
 import { useSolutions } from './SolutionsContext'
@@ -26,7 +27,7 @@ export function SolutionsPage() {
   const set = (patch: Partial<SolutionFilter>) => setFilter((f) => ({ ...f, ...patch }))
   const visible = filterSolutions(solutions, filter)
   const tools = allTools(solutions)
-  const saved = totalSavedMinutes(solutions)
+  const saved = totalSavedMinutesPerYear(solutions)
   const live = solutions.filter((s) => s.status === 'live').length
 
   return (
@@ -72,7 +73,7 @@ export function SolutionsPage() {
           {saved > 0 && (
             <div>
               <span className={styles.statValue}>{formatMinutes(saved)}</span>
-              <span className={styles.statLabel}>saved per week</span>
+              <span className={styles.statLabel}>saved per year</span>
             </div>
           )}
         </div>
@@ -157,11 +158,7 @@ export function SolutionsPage() {
                         {t}
                       </span>
                     ))}
-                    {s.savedMinutesPerWeek ? (
-                      <span className={styles.saved}>
-                        ~{formatMinutes(s.savedMinutesPerWeek)}/week
-                      </span>
-                    ) : null}
+                    {formatSaved(s) && <span className={styles.saved}>~{formatSaved(s)}</span>}
                   </span>
                 </Link>
               </li>
