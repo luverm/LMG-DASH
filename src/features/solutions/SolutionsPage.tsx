@@ -6,13 +6,14 @@ import { download } from '@/features/export/exporters'
 import { useProjects } from '@/features/projects/ProjectsContext'
 import { formatMinutes } from '@/lib/time'
 import { NewSolutionDialog } from './components/NewSolutionDialog'
+import { SavingsCard } from './components/SavingsCard'
 import { catalogueMarkdown } from './docs'
 import {
   allTools,
   defaultSolutionFilter,
   filterSolutions,
   formatSaved,
-  totalSavedMinutesPerYear,
+  savingsSummary,
   type SolutionFilter,
 } from './solutions'
 import { useSolutions } from './SolutionsContext'
@@ -27,7 +28,8 @@ export function SolutionsPage() {
   const set = (patch: Partial<SolutionFilter>) => setFilter((f) => ({ ...f, ...patch }))
   const visible = filterSolutions(solutions, filter)
   const tools = allTools(solutions)
-  const saved = totalSavedMinutesPerYear(solutions)
+  const savings = savingsSummary(solutions)
+  const saved = savings.total
   const live = solutions.filter((s) => s.status === 'live').length
 
   return (
@@ -78,6 +80,8 @@ export function SolutionsPage() {
           )}
         </div>
       )}
+
+      <SavingsCard summary={savings} />
 
       {solutions.length === 0 ? (
         <div className={styles.empty}>

@@ -109,12 +109,43 @@ export function yearlySavedMinutes(s: Solution): number {
   return t.minutes * (savedPeriods.find((p) => p.value === t.per)?.perYear ?? 1)
 }
 
-/** Total time saved per year by live solutions. */
-export function totalSavedMinutesPerYear(list: Solution[]): number {
-  return list
-    .filter((s) => !s.deletedAt && s.status === 'live')
-    .reduce((sum, s) => sum + yearlySavedMinutes(s), 0)
+export interface SavingsRow {
+  solution: Solution
+  minutes: number
+  per: SavedPeriod
+  /** How many times a year the saving happens (52, 12 or 1). */
+  factor: number
+  yearly: number
 }
+
+export interface SavingsSummary {
+  rows: SavingsRow[]
+  /** Per year, split by status. Retired solutions no longer save time and aren't counted. */
+  live: number
+  inProgress: number
+  total: number
+}
+
+/** Every solution's saving turned into a yearly figure, plus the totals. */
+export function savingsSummary(list: Solution[]): SavingsSummary {
+  const rows: SavingsRow[] = []
+  for (const solution of list) {
+    if (solution.deletedAt || solution.status === 'retired') continue
+    const t = savedTime(solution)
+    if (!t) continue
+    const factor = savedPeriods.find((p) => p.value === t.per)?.perYear ?? 1
+    rows.push({ solution, minutes: t.minutes, per: t.per, factor, yearly: t.minutes * factor })
+  }
+  rows.sort((a, b) => b.yearly - a.yearly)
+  const live = rows.filter((r) => r.solution.status === 'live').reduce((s, r) => s + r.yearly, 0)
+  const inProgress = rows
+    .filter((r) => r.solution.status === 'draft')
+    .reduce((s, r) => s + r.yearly, 0)
+  return { rows, live, inProgress, total: live + inProgress }
+}
+
+/** Total time saved per year by live solutions. */
+export const totalSavedMinutesPerYear = (list: Solution[]) => savingsSummary(list).live
 
 /** "2h per year", "30m per week" */
 export function formatSaved(s: Solution): string | null {
