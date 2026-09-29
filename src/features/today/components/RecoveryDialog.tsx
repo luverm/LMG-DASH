@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Dialog } from '@/components/ui/Dialog'
 import { ShapeButton } from '@/components/ui/ShapeButton'
+import { TimeField } from '@/components/ui/TimeField'
 import { openSegment } from '@/features/workday/day'
 import type { DayRecord } from '@/features/workday/types'
 import { atTime, dateKey, formatDayLabel, formatTimeOfDay } from '@/lib/time'
@@ -50,13 +51,7 @@ export function RecoveryDialog({ day, onResolve }: RecoveryDialogProps) {
       </p>
       <label className="field">
         <span>Stopped at</span>
-        <input
-          className="input"
-          type="time"
-          value={time}
-          onChange={(e) => setTime(e.target.value)}
-          required
-        />
+        <TimeField value={time} onChange={setTime} required />
       </label>
       {invalid && (
         <p style={{ color: 'var(--rose)' }}>That's before it started ({formatTimeOfDay(start)}).</p>

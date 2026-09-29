@@ -196,6 +196,7 @@ export function ProjectDetailPage() {
                         day: 'numeric',
                         month: 'short',
                         hour: '2-digit',
+                        hourCycle: 'h23',
                         minute: '2-digit',
                       })}
                     </time>

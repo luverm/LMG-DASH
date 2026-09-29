@@ -1,7 +1,7 @@
 import { planItemSpentMs, plannedMinutes, timeByFocus, totals } from '@/features/workday/day'
 import type { DayRecord } from '@/features/workday/types'
 import { approaches, statuses, type Project } from '@/features/projects/types'
-import { formatDuration, formatMinutes } from '@/lib/time'
+import { formatDuration, formatMinutes, formatTimeOfDay } from '@/lib/time'
 
 const label = <T extends string>(list: { value: T; label: string }[], v: T) =>
   list.find((x) => x.value === v)?.label ?? v
@@ -97,7 +97,7 @@ export function planDayPrompt(
       return `- ${i.title}${project ? ` [${project}]` : ''}${i.estimateMinutes ? ` (estimate ${formatMinutes(i.estimateMinutes)})` : ''}${spent ? `, ${formatDuration(spent)} spent` : ''}`
     })
     .join('\n')
-  return `Help me plan my workday. I have ${formatMinutes(day.targetMinutes)} available and ${formatMinutes(plannedMinutes(day))} planned so far. It's ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} now.
+  return `Help me plan my workday. I have ${formatMinutes(day.targetMinutes)} available and ${formatMinutes(plannedMinutes(day))} planned so far. It's ${formatTimeOfDay(now)} now.
 
 Open items:
 ${items || '- (nothing planned yet)'}
