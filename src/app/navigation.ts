@@ -11,5 +11,6 @@ export interface NavItem {
 export const navItems: NavItem[] = [
   { label: 'Today', to: '/', shape: 'circle' },
   { label: 'Projects', to: '/projects', shape: 'hexagon', color: 'var(--butter)' },
+  { label: 'Solutions', to: '/solutions', shape: 'square', color: 'var(--lime)' },
   { label: 'History', to: '/history', shape: 'square' },
 ]

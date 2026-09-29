@@ -15,12 +15,15 @@ import { ScorePicker } from './components/ScorePicker'
 import { useProjects } from './ProjectsContext'
 import { approaches, statuses, type Approach, type ProjectStatus } from './types'
 import { useProjectTime } from './useProjectTime'
+import { solutionFromProject } from '@/features/solutions/solutions'
+import { useSolutions } from '@/features/solutions/SolutionsContext'
 import styles from './Projects.module.css'
 
 export function ProjectDetailPage() {
   const { id } = useParams()
   const { get, update, addNote, remove, people } = useProjects()
   const { today, update: updateDay } = useWorkday()
+  const { solutions, create: createSolution } = useSolutions()
   const toast = useToast()
   const navigate = useNavigate()
   const project = get(id)
@@ -39,6 +42,7 @@ export function ProjectDetailPage() {
   }
   const p = project
   const set = (patch: Parameters<typeof update>[1]) => update(p.id, patch)
+  const linkedSolutions = solutions.filter((sol) => sol.projectIds.includes(p.id))
   const inPlan = today.plan.some((i) => i.projectId === p.id && i.status === 'open')
 
   function setStatus(status: ProjectStatus) {
@@ -101,6 +105,15 @@ export function ProjectDetailPage() {
           }}
         >
           {inPlan ? "In today's plan" : "Add to today's plan"}
+        </ShapeButton>
+        <ShapeButton
+          shape="square"
+          color="var(--lime)"
+          variant={p.status === 'delivered' ? 'soft' : 'ghost'}
+          size={p.status === 'delivered' ? 'md' : 'sm'}
+          onClick={() => navigate(`/solutions/${createSolution(solutionFromProject(p)).id}`)}
+        >
+          Document the solution
         </ShapeButton>
         <ClaudeButton prompt={() => brainstormPrompt(p)}>Brainstorm with Claude</ClaudeButton>
         <ClaudeButton prompt={() => requesterUpdatePrompt(p)} shape="square">
@@ -279,6 +292,18 @@ export function ProjectDetailPage() {
               </ShapeButton>
             </form>
           </Card>
+
+          {linkedSolutions.length > 0 && (
+            <Card title="Solutions">
+              <ul className={styles.links}>
+                {linkedSolutions.map((sol) => (
+                  <li key={sol.id}>
+                    <Link to={`/solutions/${sol.id}`}>{sol.title}</Link>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
 
           <Card title="Time">
             <p className={styles.timeTotal}>

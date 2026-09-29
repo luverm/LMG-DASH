@@ -14,7 +14,7 @@ export const shortcutGroups: { title: string; keys: [string, string][] }[] = [
     title: 'Anywhere',
     keys: [
       ['W', 'Note a new wish'],
-      ['1 / 2 / 3', 'Today / Projects / History'],
+      ['1 / 2 / 3 / 4', 'Today / Projects / Solutions / History'],
       ['?', 'Show these shortcuts'],
     ],
   },
