@@ -98,3 +98,24 @@ describe('mergeProjects', () => {
     expect(merged.projects.other.title).toBe('Other')
   })
 })
+
+describe('phases', () => {
+  it('records when the status changed and flags feedback waiting a week', async () => {
+    const { daysInStatus, needsFollowUp } = await import('./projects')
+    const p = project('X')
+    const inFeedback = patchProject(p, { status: 'feedback' }, new Date('2026-09-01T10:00:00Z'))
+    expect(inFeedback.statusSince).toBe('2026-09-01T10:00:00.000Z')
+    expect(daysInStatus(inFeedback, new Date('2026-09-05T10:00:00Z'))).toBe(4)
+    expect(needsFollowUp(inFeedback, new Date('2026-09-05T10:00:00Z'))).toBe(false)
+    expect(needsFollowUp(inFeedback, new Date('2026-09-08T10:00:00Z'))).toBe(true)
+
+    // Editing other fields doesn't reset the clock.
+    const edited = patchProject(inFeedback, { title: 'Y' }, new Date('2026-09-03T10:00:00Z'))
+    expect(edited.statusSince).toBe('2026-09-01T10:00:00.000Z')
+  })
+
+  it('counts awaiting feedback as open work', () => {
+    const list = [project('A', { status: 'feedback', updatedAt: '1' })]
+    expect(filterProjects(list, defaultFilter).map((x) => x.title)).toEqual(['A'])
+  })
+})

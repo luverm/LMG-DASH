@@ -5,7 +5,7 @@ import { Shape } from '@/components/shapes/Shape'
 import { Card } from '@/components/ui/Card'
 import { ShapeButton } from '@/components/ui/ShapeButton'
 import { ClaudeButton } from '@/features/claude/ClaudeButton'
-import { brainstormPrompt, requesterUpdatePrompt } from '@/features/claude/prompts'
+import { brainstormPrompt, feedbackPrompt, requesterUpdatePrompt } from '@/features/claude/prompts'
 import { addPlanItem } from '@/features/workday/day'
 import { useWorkday } from '@/features/workday/WorkdayContext'
 import { createId, formatDayLabel, formatDuration } from '@/lib/time'
@@ -13,7 +13,9 @@ import { EditableText } from './components/EditableText'
 import { PeopleInput } from './components/PeopleInput'
 import { ScorePicker } from './components/ScorePicker'
 import { useProjects } from './ProjectsContext'
-import { approaches, statuses, type Approach, type ProjectStatus } from './types'
+import { PhaseTrack } from './components/PhaseTrack'
+import { daysInStatus } from './projects'
+import { approaches, statusInfo, type Approach, type ProjectStatus } from './types'
 import { useProjectTime } from './useProjectTime'
 import { solutionFromProject } from '@/features/solutions/solutions'
 import { useSolutions } from '@/features/solutions/SolutionsContext'
@@ -69,7 +71,12 @@ export function ProjectDetailPage() {
           className={celebrate ? styles.celebrate : undefined}
           onAnimationEnd={() => setCelebrate(false)}
         >
-          <Shape kind="hexagon" size={34} color="var(--butter)" filled={p.status === 'delivered'} />
+          <Shape
+            kind="hexagon"
+            size={34}
+            color={statusInfo(p.status).color}
+            filled={p.status === 'delivered'}
+          />
         </span>
         <EditableText
           label="Title"
@@ -81,19 +88,7 @@ export function ProjectDetailPage() {
         />
       </header>
 
-      <div className={styles.pipeline} role="radiogroup" aria-label="Status">
-        {statuses.map((s) => (
-          <button
-            key={s.value}
-            role="radio"
-            aria-checked={p.status === s.value}
-            className={p.status === s.value ? styles.stageActive : undefined}
-            onClick={() => setStatus(s.value)}
-          >
-            {s.label}
-          </button>
-        ))}
-      </div>
+      <PhaseTrack project={p} onChange={setStatus} />
 
       <div className={styles.actions}>
         <ShapeButton
@@ -115,6 +110,15 @@ export function ProjectDetailPage() {
         >
           Document the solution
         </ShapeButton>
+        {p.status === 'feedback' && (
+          <ClaudeButton
+            prompt={() => feedbackPrompt(p, daysInStatus(p))}
+            shape="triangle"
+            color="var(--peach)"
+          >
+            {daysInStatus(p) >= 7 ? 'Draft a follow-up' : 'Ask for feedback'}
+          </ClaudeButton>
+        )}
         <ClaudeButton prompt={() => brainstormPrompt(p)}>Brainstorm with Claude</ClaudeButton>
         <ClaudeButton prompt={() => requesterUpdatePrompt(p)} shape="square">
           Draft an update

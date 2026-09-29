@@ -2,20 +2,20 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { Shape } from '@/components/shapes/Shape'
 import { ShapeButton } from '@/components/ui/ShapeButton'
+import { PhaseDots } from './components/PhaseTrack'
 import { ScoreDots } from './components/ScorePicker'
 import { useQuickCapture } from './QuickCaptureContext'
-import { defaultFilter, filterProjects, groupByStatus, type ProjectFilter } from './projects'
+import {
+  daysInStatus,
+  defaultFilter,
+  filterProjects,
+  groupByStatus,
+  needsFollowUp,
+  type ProjectFilter,
+} from './projects'
 import { useProjects } from './ProjectsContext'
-import { approaches, statuses } from './types'
+import { approaches, statuses, statusInfo } from './types'
 import styles from './Projects.module.css'
-
-function relative(iso: string, now = Date.now()) {
-  const days = Math.floor((now - new Date(iso).getTime()) / 86_400_000)
-  if (days <= 0) return 'today'
-  if (days === 1) return 'yesterday'
-  if (days < 30) return `${days} days ago`
-  return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
-}
 
 export function ProjectsPage() {
   const { projects, people } = useProjects()
@@ -24,6 +24,7 @@ export function ProjectsPage() {
   const set = (patch: Partial<ProjectFilter>) => setFilter((f) => ({ ...f, ...patch }))
   const visible = filterProjects(projects, filter)
   const groups = groupByStatus(visible)
+  const waiting = projects.filter((p) => !p.deletedAt && needsFollowUp(p))
 
   return (
     <div className={styles.page}>
@@ -113,10 +114,23 @@ export function ProjectsPage() {
             </select>
           </div>
 
+          {waiting.length > 0 && (
+            <button
+              className={styles.followBanner}
+              onClick={() => set({ status: 'feedback', person: '', approach: 'all', search: '' })}
+            >
+              <Shape kind="triangle" size={16} color="var(--peach)" filled />
+              {waiting.length === 1
+                ? `"${waiting[0].title}" has been waiting for feedback for over a week.`
+                : `${waiting.length} projects have been waiting for feedback for over a week.`}{' '}
+              <span>Show</span>
+            </button>
+          )}
           {groups.length === 0 && <p className={styles.muted}>Nothing matches these filters.</p>}
           {groups.map((g) => (
             <section key={g.value} className={styles.group}>
-              <h2 className={styles.groupTitle}>
+              <h2 className={styles.groupTitle} style={{ ['--c' as string]: g.color }}>
+                <span className={styles.groupDot} aria-hidden />
                 {g.label} <span className={styles.count}>{g.projects.length}</span>
               </h2>
               <ul className={styles.list}>
@@ -126,7 +140,7 @@ export function ProjectsPage() {
                       <Shape
                         kind="hexagon"
                         size={20}
-                        color="var(--butter)"
+                        color={statusInfo(p.status).color}
                         filled={p.status === 'delivered'}
                       />
                       <span className={styles.rowMain}>
@@ -144,7 +158,16 @@ export function ProjectsPage() {
                         <ScoreDots value={p.impact} title="Impact" />
                         <ScoreDots value={p.effort} title="Effort" />
                       </span>
-                      <span className={styles.rowDate}>{relative(p.updatedAt)}</span>
+                      <span className={styles.rowPhase}>
+                        <PhaseDots status={p.status} />
+                        <span
+                          className={`${styles.rowDate} ${needsFollowUp(p) ? styles.followUp : ''}`}
+                        >
+                          {needsFollowUp(p)
+                            ? `Follow up · ${daysInStatus(p)}d`
+                            : `${statusInfo(p.status).label} · ${daysInStatus(p) === 0 ? 'today' : `${daysInStatus(p)}d`}`}
+                        </span>
+                      </span>
                     </Link>
                   </li>
                 ))}

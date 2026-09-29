@@ -1,0 +1,199 @@
+.wrap {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+}
+
+.track {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.step {
+  position: relative;
+}
+
+/* The line connecting each step to the previous one. */
+.step + .step::before {
+  content: '';
+  position: absolute;
+  top: 13px;
+  right: 50%;
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background-color var(--dur);
+}
+
+.done + .step::before,
+.done + .done::before {
+  background: color-mix(in srgb, var(--c) 70%, transparent);
+}
+
+.step button {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.node {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--on-pastel);
+  font-size: 0.8rem;
+  font-weight: 800;
+  transition:
+    background-color var(--dur),
+    border-color var(--dur),
+    transform var(--dur) var(--ease-spring);
+}
+
+.step button:hover .node {
+  transform: scale(1.12);
+  border-color: var(--c);
+}
+
+.step button:active .node {
+  transform: scale(0.9);
+}
+
+.done .node {
+  border-color: var(--c);
+  background: var(--c);
+}
+
+.current .node {
+  border-color: var(--c);
+  background: color-mix(in srgb, var(--c) 30%, var(--surface));
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--c) 55%, transparent);
+  animation: beacon 2.2s ease-out infinite;
+}
+
+.label {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.25;
+}
+
+.done .label {
+  color: var(--text);
+}
+
+.current .label {
+  color: var(--c);
+  font-weight: 700;
+}
+
+.now {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+
+.badge {
+  padding: 0.1rem 0.65rem;
+  border-radius: 999px;
+  background: var(--c);
+  color: var(--on-pastel);
+  font-weight: 700;
+}
+
+.days {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.hint {
+  color: var(--text-muted);
+}
+
+.side {
+  display: flex;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.side button {
+  padding: 0.2rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.side button:hover {
+  color: var(--text);
+}
+
+.side .sideActive {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+.sidelined .track {
+  opacity: 0.45;
+}
+
+/* Compact list version */
+.dots {
+  display: inline-grid;
+  grid-template-columns: repeat(5, 10px);
+  gap: 3px;
+}
+
+.dots span {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--border);
+}
+
+@keyframes beacon {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--c) 55%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+@media (max-width: 600px) {
+  .wrap {
+    padding: var(--space-3) var(--space-2) var(--space-3);
+  }
+
+  .label {
+    font-size: 0.72rem;
+  }
+
+  .side {
+    margin-left: 0;
+    width: 100%;
+  }
+}
