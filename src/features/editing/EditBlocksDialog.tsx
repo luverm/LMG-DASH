@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Dialog } from '@/components/ui/Dialog'
 import { ShapeButton } from '@/components/ui/ShapeButton'
+import { TimeField } from '@/components/ui/TimeField'
 import {
   breakLabel,
   breakTypes,
@@ -149,11 +150,11 @@ export function EditBlocksDialog({ day, onSave, onClose }: EditBlocksDialogProps
                 <div className={styles.times}>
                   <label className={styles.time}>
                     <span>From</span>
-                    <input
+                    <TimeField
                       className={`input ${styles.timeInput}`}
-                      type="time"
+                      aria-label="From"
                       value={d.start}
-                      onChange={(e) => set(d.id, { start: e.target.value })}
+                      onChange={(start) => set(d.id, { start })}
                     />
                   </label>
                   <span className={styles.arrow} aria-hidden>
@@ -173,11 +174,11 @@ export function EditBlocksDialog({ day, onSave, onClose }: EditBlocksDialogProps
                         Now · stop
                       </button>
                     ) : (
-                      <input
+                      <TimeField
                         className={`input ${styles.timeInput}`}
-                        type="time"
+                        aria-label="To"
                         value={d.end}
-                        onChange={(e) => set(d.id, { end: e.target.value })}
+                        onChange={(end) => set(d.id, { end })}
                       />
                     )}
                   </label>
