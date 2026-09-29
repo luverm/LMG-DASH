@@ -9,6 +9,7 @@ import {
   patchSolution,
   solutionFromProject,
   formatSaved,
+  savingsSummary,
   totalSavedMinutesPerYear,
   yearlySavedMinutes,
 } from './solutions'
@@ -109,5 +110,32 @@ describe('solutions', () => {
 
   it('parses comma lists without duplicates', () => {
     expect(parseList('Python, python , Power Automate,')).toEqual(['Python', 'Power Automate'])
+  })
+
+  it('adds up every saving per year, showing the sum per solution', () => {
+    const weekly = patchSolution(
+      createSolution({ title: 'W', savedMinutes: 30, savedPer: 'week' }),
+      { status: 'live' },
+    )
+    const monthly = createSolution({ title: 'M', savedMinutes: 180, savedPer: 'month' }) // in progress
+    const yearly = patchSolution(
+      createSolution({ title: 'Y', savedMinutes: 960, savedPer: 'year' }),
+      { status: 'live' },
+    )
+    const retired = patchSolution(
+      createSolution({ title: 'R', savedMinutes: 600, savedPer: 'year' }),
+      { status: 'retired' },
+    )
+    const none = createSolution({ title: 'N' })
+
+    const summary = savingsSummary([weekly, monthly, yearly, retired, none])
+    expect(summary.rows.map((r) => [r.solution.title, r.factor, r.yearly])).toEqual([
+      ['M', 12, 2160],
+      ['W', 52, 1560],
+      ['Y', 1, 960],
+    ])
+    expect(summary.live).toBe(1560 + 960)
+    expect(summary.inProgress).toBe(2160)
+    expect(summary.total).toBe(1560 + 960 + 2160)
   })
 })

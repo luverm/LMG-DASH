@@ -29,9 +29,14 @@ describe('Solutions page', () => {
 
     await user.click(screen.getByRole('link', { name: '← Solutions' }))
     expect(await screen.findByText('saved per year')).toBeInTheDocument()
-    expect(screen.getByText('16h', { selector: 'span' })).toBeInTheDocument()
     expect(screen.getByText('~16h per year')).toBeInTheDocument()
-    const card = await screen.findByRole('link', { name: /Invoice export/ })
+
+    // The sum is shown: 16h per year × 1 = 16h, and the total.
+    const table = screen.getByRole('table', { name: 'How the yearly total is calculated' })
+    expect(within(table).getByText('16h per year')).toBeInTheDocument()
+    expect(within(table).getByText('× 1')).toBeInTheDocument()
+    expect(within(table).getByRole('rowheader', { name: 'Total per year' })).toBeInTheDocument()
+    const card = (await screen.findAllByRole('link', { name: /Invoice export/ })).at(-1)!
     expect(within(card).getByText('Live')).toBeInTheDocument()
     expect(screen.getByText('live')).toBeInTheDocument()
   })
