@@ -2,13 +2,14 @@
 
 A calm, playful work dashboard: plan your day, time your work and breaks, close the day with a short summary, and keep track of the problems coworkers bring you, with or without AI.
 
-Pastel circles, triangles, hexagons and squares on anthracite:
+Pastel circles, triangles, hexagons and squares on anthracite. In the background they drift slowly and move out of the way of your cursor.
 
 - ◯ **Circle (mint):** work and time
 - △ **Triangle (peach):** breaks
 - ⬡ **Hexagon (lavender):** focus and tasks
 - ⬡ **Hexagon (butter):** projects and wishes
 - □ **Square (sky):** the day as a whole
+- □ **Square (lime):** solutions
 
 The full plan is in [`docs/PLAN.md`](docs/PLAN.md).
 
@@ -20,6 +21,7 @@ The full plan is in [`docs/PLAN.md`](docs/PLAN.md).
 - **Close workday:** decide done / carry over / drop for each open item. The summary is drafted for you, grouped by project. Add blockers and a mood.
 - **Forgotten clock:** if the clock ran past midnight, the app asks when you actually stopped.
 - **Projects & wishes:** note coworkers' wishes in seconds (the **Wish** button, from any page). Track the problem, wish, approach, impact/effort, links and notes. Time on plan items linked to a project adds up per project.
+- **Solutions:** document what you've built: summary, problem, how it works, how to use it, maintenance, tools, who uses it, time saved per week, links, and the requests it solves. "Document the solution" on a project starts the page for you; export one or all as Markdown.
 - **Claude, on your subscription:** "Copy for Claude" buttons copy a prompt with context and open claude.ai. The app itself never calls an AI API.
 - **History:** a weekly overview (hours per day against your target, time per project, done items) and past days with totals, timeline, summary and notes.
 - **Edit times:** fix a forgotten stop, change start and end times, turn work into a break, add or delete blocks, today or on any past day.
@@ -28,7 +30,7 @@ The full plan is in [`docs/PLAN.md`](docs/PLAN.md).
 - **Routines:** plan items that add themselves on chosen weekdays (e.g. a standup).
 - **Away detection (desktop):** after a long time away with the clock running, it asks whether that was work, a break, or not working.
 - **Export & backup:** Markdown or CSV reports, plus a full JSON backup you can restore.
-- **Keyboard shortcuts:** Space, B, F, N, E, C on Today; W, 1/2/3 and ? anywhere.
+- **Keyboard shortcuts:** Space, B, F, N, E, C on Today; W, 1–4 and ? anywhere.
 - **Install as an app:** add it to your home screen for a full-screen app. Optional system notifications for breaks and the focus timer.
 
 ## Where your data lives
@@ -67,7 +69,7 @@ Pages from a private repo needs GitHub Pro. On a personal account the Pages site
 3. Open the app, enter `your-name/lmg-dash-data`, the token and a passphrase.
 4. Turn on **secret scanning** and **push protection** for both repos (Settings → Code security).
 
-Data is written under `users/<github-login>/` (`days/YYYY-MM-DD.json`, `projects.json`, `settings.json`). A team can later share one data repo without changing the format.
+Data is written under `users/<github-login>/` (`days/YYYY-MM-DD.json`, `projects.json`, `solutions.json`, `settings.json`). A team can later share one data repo without changing the format.
 
 ### Using Claude with your data
 

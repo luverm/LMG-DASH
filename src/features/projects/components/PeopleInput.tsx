@@ -7,6 +7,7 @@ interface PeopleInputProps {
   onChange(names: string[]): void
   label?: string
   autoFocus?: boolean
+  placeholder?: string
 }
 
 /** Comma-separated names with suggestions from people entered before. */
@@ -16,6 +17,7 @@ export function PeopleInput({
   onChange,
   label = 'From',
   autoFocus,
+  placeholder = 'Anna, Bram',
 }: PeopleInputProps) {
   const listId = useId()
   const [text, setText] = useState(value.join(', '))
@@ -37,7 +39,7 @@ export function PeopleInput({
         list={listId}
         value={text}
         autoFocus={autoFocus}
-        placeholder="Anna, Bram"
+        placeholder={placeholder}
         onChange={(e) => {
           setText(e.target.value)
           onChange(parsePeople(e.target.value))

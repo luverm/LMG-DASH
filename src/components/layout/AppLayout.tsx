@@ -10,6 +10,7 @@ import { ShapeButton } from '@/components/ui/ShapeButton'
 import { QuickCaptureDialog } from '@/features/projects/components/QuickCaptureDialog'
 import { QuickCaptureContext } from '@/features/projects/QuickCaptureContext'
 import { ProjectsProvider } from '@/features/projects/ProjectsProvider'
+import { SolutionsProvider } from '@/features/solutions/SolutionsProvider'
 import { WorkdayProvider } from '@/features/workday/WorkdayProvider'
 import { Dialog } from '@/components/ui/Dialog'
 import { useShortcuts } from '@/hooks/useShortcuts'
@@ -30,7 +31,8 @@ export function AppLayout() {
     '?': () => setShowShortcuts(true),
     '1': () => navigate('/'),
     '2': () => navigate('/projects'),
-    '3': () => navigate('/history'),
+    '3': () => navigate('/solutions'),
+    '4': () => navigate('/history'),
   })
   // Block body on purpose: newer browsers return a Promise from scrollTo, and React would
   // treat a returned value as the effect's cleanup and try to call it.
@@ -81,18 +83,20 @@ export function AppLayout() {
           <main className={styles.content}>
             <WorkdayProvider>
               <ProjectsProvider>
-                <Outlet />
-                {capturing && <QuickCaptureDialog onClose={() => setCapturing(false)} />}
-                {showShortcuts && (
-                  <Dialog
-                    title="Keyboard shortcuts"
-                    shape="square"
-                    wide
-                    onClose={() => setShowShortcuts(false)}
-                  >
-                    <ShortcutList />
-                  </Dialog>
-                )}
+                <SolutionsProvider>
+                  <Outlet />
+                  {capturing && <QuickCaptureDialog onClose={() => setCapturing(false)} />}
+                  {showShortcuts && (
+                    <Dialog
+                      title="Keyboard shortcuts"
+                      shape="square"
+                      wide
+                      onClose={() => setShowShortcuts(false)}
+                    >
+                      <ShortcutList />
+                    </Dialog>
+                  )}
+                </SolutionsProvider>
               </ProjectsProvider>
             </WorkdayProvider>
           </main>

@@ -2,6 +2,7 @@ export interface DataPaths {
   daysDir: string
   day(date: string): string
   projects: string
+  solutions: string
   settings: string
 }
 
@@ -12,6 +13,7 @@ export function dataPaths(login: string): DataPaths {
     daysDir: `${base}/days`,
     day: (date) => `${base}/days/${date}.json`,
     projects: `${base}/projects.json`,
+    solutions: `${base}/solutions.json`,
     settings: `${base}/settings.json`,
   }
 }

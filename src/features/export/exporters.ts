@@ -2,6 +2,8 @@ import type { SyncEngine } from '@/lib/storage/syncEngine'
 import type { DataPaths } from '@/app/data/paths'
 import { mergeProjects } from '@/features/projects/projects'
 import { emptyProjectsFile, type ProjectsFile } from '@/features/projects/types'
+import { mergeSolutions } from '@/features/solutions/solutions'
+import { emptySolutionsFile, type SolutionsFile } from '@/features/solutions/types'
 import { segmentMs, totals } from '@/features/workday/day'
 import { mergeDay, mergeSettings } from '@/features/workday/merge'
 import { breakLabel, withDefaults, type DayRecord, type Settings } from '@/features/workday/types'
@@ -13,6 +15,8 @@ export interface Backup {
   exportedAt: string
   settings: Settings
   projects: ProjectsFile
+  /** Missing in backups made before solutions existed. */
+  solutions?: SolutionsFile
   days: DayRecord[]
 }
 
@@ -24,9 +28,10 @@ export async function loadAllDays(engine: SyncEngine, paths: DataPaths): Promise
 }
 
 export async function createBackup(engine: SyncEngine, paths: DataPaths): Promise<Backup> {
-  const [days, projects, settings] = await Promise.all([
+  const [days, projects, solutions, settings] = await Promise.all([
     loadAllDays(engine, paths),
     engine.load<ProjectsFile>(paths.projects),
+    engine.load<SolutionsFile>(paths.solutions),
     engine.load<Settings>(paths.settings),
   ])
   return {
@@ -35,6 +40,7 @@ export async function createBackup(engine: SyncEngine, paths: DataPaths): Promis
     exportedAt: new Date().toISOString(),
     settings: withDefaults(settings),
     projects: projects ?? emptyProjectsFile,
+    solutions: solutions ?? emptySolutionsFile,
     days,
   }
 }
@@ -62,6 +68,14 @@ export async function restoreBackup(engine: SyncEngine, paths: DataPaths, backup
       merge: mergeProjects,
     },
   )
+  if (backup.solutions) {
+    const solutions = await engine.load<SolutionsFile>(paths.solutions, { merge: mergeSolutions })
+    engine.set(
+      paths.solutions,
+      solutions ? mergeSolutions(solutions, backup.solutions) : backup.solutions,
+      { merge: mergeSolutions },
+    )
+  }
   const settings = await engine.load<Settings>(paths.settings, { merge: mergeSettings })
   engine.set(
     paths.settings,
