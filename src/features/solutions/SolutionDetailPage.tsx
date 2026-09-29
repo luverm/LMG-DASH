@@ -10,13 +10,12 @@ import { EditableText } from '@/features/projects/components/EditableText'
 import { PeopleInput } from '@/features/projects/components/PeopleInput'
 import { useProjects } from '@/features/projects/ProjectsContext'
 import { createId } from '@/lib/time'
+import { SavedTimeInput } from './components/SavedTimeInput'
 import { documentationPrompt, solutionMarkdown, userGuidePrompt } from './docs'
 import { allTools } from './solutions'
 import { useSolutions } from './SolutionsContext'
 import { solutionStatuses, type Solution } from './types'
 import styles from './Solutions.module.css'
-
-const savedOptions = [15, 30, 60, 120, 240, 480]
 
 export function SolutionDetailPage() {
   const { id } = useParams()
@@ -215,25 +214,7 @@ export function SolutionDetailPage() {
                 />
                 <span>Uses AI</span>
               </label>
-              <label className="field">
-                <span>Time saved per week (roughly)</span>
-                <select
-                  className="input"
-                  value={s.savedMinutesPerWeek ?? ''}
-                  onChange={(e) =>
-                    set({
-                      savedMinutesPerWeek: e.target.value ? Number(e.target.value) : undefined,
-                    })
-                  }
-                >
-                  <option value="">Not sure</option>
-                  {savedOptions.map((m) => (
-                    <option key={m} value={m}>
-                      {m < 60 ? `${m} minutes` : `${m / 60} hour${m === 60 ? '' : 's'}`}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <SavedTimeInput solution={s} onChange={set} />
             </div>
           </Card>
 

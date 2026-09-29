@@ -8,7 +8,9 @@ import {
   parseList,
   patchSolution,
   solutionFromProject,
-  totalSavedMinutes,
+  formatSaved,
+  totalSavedMinutesPerYear,
+  yearlySavedMinutes,
 } from './solutions'
 
 describe('solutions', () => {
@@ -35,13 +37,29 @@ describe('solutions', () => {
     expect(draft.problem).toBe('Manual copying\n\nWish: Automatic booking')
   })
 
-  it('stamps liveSince when going live and totals the time saved', () => {
+  it('stamps liveSince when going live and totals the time saved per year', () => {
     const live = patchSolution(createSolution({ title: 'A', savedMinutesPerWeek: 60 }), {
       status: 'live',
     })
     expect(live.liveSince).toBeDefined()
     const draft = createSolution({ title: 'B', savedMinutesPerWeek: 120 })
-    expect(totalSavedMinutes([live, draft])).toBe(60)
+    // Old weekly-only data counts 52 times a year; drafts don't count.
+    expect(totalSavedMinutesPerYear([live, draft])).toBe(60 * 52)
+
+    const yearlyEvent = patchSolution(
+      createSolution({ title: 'Event', savedMinutes: 16 * 60, savedPer: 'year' }),
+      { status: 'live' },
+    )
+    const monthly = patchSolution(
+      createSolution({ title: 'M', savedMinutes: 30, savedPer: 'month' }),
+      {
+        status: 'live',
+      },
+    )
+    expect(yearlySavedMinutes(yearlyEvent)).toBe(16 * 60)
+    expect(yearlySavedMinutes(monthly)).toBe(30 * 12)
+    expect(formatSaved(yearlyEvent)).toBe('16h per year')
+    expect(totalSavedMinutesPerYear([yearlyEvent, monthly])).toBe(16 * 60 + 360)
   })
 
   it('filters by status, tool and search text', () => {

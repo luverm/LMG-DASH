@@ -6,6 +6,14 @@ export const solutionStatuses: { value: SolutionStatus; label: string }[] = [
   { value: 'retired', label: 'Retired' },
 ]
 
+export type SavedPeriod = 'week' | 'month' | 'year'
+
+export const savedPeriods: { value: SavedPeriod; label: string; perYear: number }[] = [
+  { value: 'week', label: 'per week', perYear: 52 },
+  { value: 'month', label: 'per month', perYear: 12 },
+  { value: 'year', label: 'per year', perYear: 1 },
+]
+
 export interface SolutionLink {
   id: string
   label: string
@@ -32,7 +40,10 @@ export interface Solution {
   team?: string
   status: SolutionStatus
   usesAi: boolean
-  /** Rough time saved per week, in minutes. */
+  /** Rough time saved, in minutes, per `savedPer` period. */
+  savedMinutes?: number
+  savedPer?: SavedPeriod
+  /** Older field from before periods existed; read as a weekly amount. */
   savedMinutesPerWeek?: number
   projectIds: string[]
   links: SolutionLink[]

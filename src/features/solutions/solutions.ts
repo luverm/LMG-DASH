@@ -1,6 +1,13 @@
 import type { Project } from '@/features/projects/types'
 import { createId } from '@/lib/time'
-import type { Solution, SolutionsFile, SolutionStatus } from './types'
+import { formatMinutes } from '@/lib/time'
+import {
+  savedPeriods,
+  type SavedPeriod,
+  type Solution,
+  type SolutionsFile,
+  type SolutionStatus,
+} from './types'
 
 export function createSolution(
   input: Partial<Solution> & { title: string },
@@ -88,11 +95,32 @@ export function filterSolutions(list: Solution[], f: SolutionFilter): Solution[]
     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
 }
 
-/** Total weekly time saved by live solutions. */
-export function totalSavedMinutes(list: Solution[]): number {
+/** The time saved as entered (with a period), reading old weekly-only data too. */
+export function savedTime(s: Solution): { minutes: number; per: SavedPeriod } | null {
+  if (s.savedMinutes) return { minutes: s.savedMinutes, per: s.savedPer ?? 'week' }
+  if (s.savedMinutesPerWeek) return { minutes: s.savedMinutesPerWeek, per: 'week' }
+  return null
+}
+
+/** Time saved per year, so weekly, monthly and yearly savings can be added up. */
+export function yearlySavedMinutes(s: Solution): number {
+  const t = savedTime(s)
+  if (!t) return 0
+  return t.minutes * (savedPeriods.find((p) => p.value === t.per)?.perYear ?? 1)
+}
+
+/** Total time saved per year by live solutions. */
+export function totalSavedMinutesPerYear(list: Solution[]): number {
   return list
     .filter((s) => !s.deletedAt && s.status === 'live')
-    .reduce((sum, s) => sum + (s.savedMinutesPerWeek ?? 0), 0)
+    .reduce((sum, s) => sum + yearlySavedMinutes(s), 0)
+}
+
+/** "2h per year", "30m per week" */
+export function formatSaved(s: Solution): string | null {
+  const t = savedTime(s)
+  if (!t) return null
+  return `${formatMinutes(t.minutes)} ${savedPeriods.find((p) => p.value === t.per)?.label ?? ''}`.trim()
 }
 
 function unionById<T extends { id: string }>(a: T[], b: T[]): T[] {

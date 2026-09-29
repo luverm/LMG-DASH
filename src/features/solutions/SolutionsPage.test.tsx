@@ -20,7 +20,17 @@ describe('Solutions page', () => {
     expect(screen.getByRole('link', { name: 'Invoice export' })).toBeInTheDocument() // linked project
 
     await user.click(screen.getByRole('radio', { name: 'Live' }))
+
+    // A once-a-year event: 16 hours per year.
+    await user.type(screen.getByLabelText('Hours saved'), '16')
+    await user.tab()
+    await user.selectOptions(screen.getByLabelText('Per'), 'year')
+    expect(screen.getByLabelText('Hours saved')).toHaveValue('16')
+
     await user.click(screen.getByRole('link', { name: '← Solutions' }))
+    expect(await screen.findByText('saved per year')).toBeInTheDocument()
+    expect(screen.getByText('16h', { selector: 'span' })).toBeInTheDocument()
+    expect(screen.getByText('~16h per year')).toBeInTheDocument()
     const card = await screen.findByRole('link', { name: /Invoice export/ })
     expect(within(card).getByText('Live')).toBeInTheDocument()
     expect(screen.getByText('live')).toBeInTheDocument()

@@ -1,4 +1,5 @@
 import { formatMinutes } from '@/lib/time'
+import { formatSaved, savedTime, yearlySavedMinutes } from './solutions'
 import { solutionStatuses, type Solution } from './types'
 
 type ProjectName = (id?: string) => string | undefined
@@ -15,8 +16,8 @@ export function solutionMarkdown(s: Solution, projectName: ProjectName): string 
     s.team ? `**Team:** ${s.team}` : null,
     s.tools.length ? `**Tools:** ${s.tools.join(', ')}` : null,
     `**Uses AI:** ${s.usesAi ? 'yes' : 'no'}`,
-    s.savedMinutesPerWeek
-      ? `**Saves:** about ${formatMinutes(s.savedMinutesPerWeek)} per week`
+    formatSaved(s)
+      ? `**Saves:** about ${formatSaved(s)}${savedTime(s)?.per !== 'year' ? ` (~${formatMinutes(yearlySavedMinutes(s))} per year)` : ''}`
       : null,
   ].filter(Boolean)
   const projects = s.projectIds.map((id) => projectName(id)).filter(Boolean)
