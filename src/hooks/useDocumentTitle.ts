@@ -8,6 +8,13 @@ function setTitle(title: string) {
 
 /** Sets the tab title while mounted; restores the default afterwards. */
 export function useDocumentTitle(title: string | null) {
-  useEffect(() => setTitle(title ?? DEFAULT_TITLE), [title])
-  useEffect(() => () => setTitle(DEFAULT_TITLE), [])
+  useEffect(() => {
+    setTitle(title ?? DEFAULT_TITLE)
+  }, [title])
+  useEffect(
+    () => () => {
+      setTitle(DEFAULT_TITLE)
+    },
+    [],
+  )
 }

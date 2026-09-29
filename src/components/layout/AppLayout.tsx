@@ -32,7 +32,11 @@ export function AppLayout() {
     '2': () => navigate('/projects'),
     '3': () => navigate('/history'),
   })
-  useEffect(() => window.scrollTo?.(0, 0), [pathname])
+  // Block body on purpose: newer browsers return a Promise from scrollTo, and React would
+  // treat a returned value as the effect's cleanup and try to call it.
+  useEffect(() => {
+    window.scrollTo?.(0, 0)
+  }, [pathname])
 
   return (
     <ToastProvider>
